@@ -94,7 +94,6 @@ const seed = async () => {
     }
 
     console.log('\n✅ Seeding complete!');
-    console.log(`Admin: ${process.env.ADMIN_EMAIL} / ${process.env.ADMIN_PASSWORD}`);
     process.exit(0);
   } catch (err) {
     console.error('Seeding error:', err);
