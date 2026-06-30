@@ -33,8 +33,10 @@ const tableSessionSchema = new mongoose.Schema({
 
   // Billing
   subtotal: { type: Number, default: 0 },
+  discount: { type: Number, default: 0 },
   gstRate: { type: Number, default: 5 },
   gstAmount: { type: Number, default: 0 },
+  serviceCharge: { type: Number, default: 0 },
   total: { type: Number, default: 0 },
 
   status: {
@@ -54,8 +56,9 @@ const tableSessionSchema = new mongoose.Schema({
 // Recalculate totals
 tableSessionSchema.methods.recalculate = function () {
   this.subtotal = this.orders.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  this.gstAmount = parseFloat((this.subtotal * (this.gstRate / 100)).toFixed(2));
-  this.total = parseFloat((this.subtotal + this.gstAmount).toFixed(2));
+  const taxable = Math.max(0, this.subtotal - this.discount);
+  this.gstAmount = parseFloat((taxable * (this.gstRate / 100)).toFixed(2));
+  this.total = parseFloat((taxable + this.gstAmount + this.serviceCharge).toFixed(2));
 };
 
 export default mongoose.model('TableSession', tableSessionSchema);

@@ -280,19 +280,19 @@ router.post('/:id/session/bill', protect, async (req, res, next) => {
       customerPhone: session.customerPhone,
       items,
       subtotal: session.subtotal,
+      discount: session.discount,
       gstRate: session.gstRate,
       gstAmount: session.gstAmount,
+      serviceCharge: session.serviceCharge,
       total: session.total,
       paymentMethod: req.body.paymentMethod || 'cash',
       paymentStatus: 'pending',
-      isPaid: false,
     });
 
     session.invoice = invoice._id;
     await session.save();
 
     await createNotification('bill_generated', 'Bill Generated', `Invoice ${invoiceNumber} - Rs.${session.total} - Table ${table.number} awaiting payment verification`, { invoiceId: invoice._id }, 'admin');
-    return res.json({ success: true, invoice, session });
 
     // Free the table
     table.status = 'available';
@@ -308,12 +308,11 @@ router.post('/:id/session/bill', protect, async (req, res, next) => {
     // WhatsApp notifications
     await sendInvoiceNotification(session.customerPhone, session.customerName, invoiceNumber, session.total);
 
-    // Schedule feedback (10 min) — simplified with setTimeout
+    // Schedule feedback (10 min)
     const feedbackToken = crypto.randomBytes(16).toString('hex');
     await Feedback.create({
       customerName: session.customerName,
       customerPhone: session.customerPhone,
-      rating: 0,
       review: '',
       session: session._id,
       feedbackToken,
@@ -326,9 +325,7 @@ router.post('/:id/session/bill', protect, async (req, res, next) => {
       } catch (e) { console.error('Feedback WA error', e.message); }
     }, 10 * 60 * 1000);
 
-    await createNotification('bill_generated', 'Bill Generated', `Invoice ${invoiceNumber} — ₹${session.total} — Table ${table.number}`, { invoiceId: invoice._id }, 'admin');
-
-    res.json({ success: true, invoice, session });
+    return res.json({ success: true, invoice, session });
   } catch (err) { next(err); }
 });
 

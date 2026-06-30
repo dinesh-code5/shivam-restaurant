@@ -24,7 +24,7 @@ import AdminTables             from './admin/restaurant/AdminTables';
 import KitchenKOT              from './admin/kitchen/KitchenKOT';
 import AdminBilling            from './admin/billing/AdminBilling';
 import AdminAnalytics          from './admin/analytics/AdminAnalytics';
-import AdminFeedback           from './admin/feedback/AdminFeedback';
+import AdminFeedback           from './admin/restaurant/feedback/AdminFeedback';
 import AdminWhatsApp           from './admin/AdminWhatsApp';
 import AdminRooms              from './admin/rooms/AdminRooms';
 

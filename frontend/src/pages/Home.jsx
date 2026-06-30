@@ -1,3 +1,5 @@
+import ImageAnimation from '../components/ImageAnimation';
+import ReviewForm from '../components/ReviewForm';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
@@ -5,6 +7,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Reveal from '../components/Reveal';
 import SectionHeading from '../components/SectionHeading';
+import HeroSlider from '../components/HeroSlider'
 
 const ROOMS = [
   { name: 'Deluxe Room', sub: 'Garden View', price: 2500, cap: 2, size: '320 sq ft', amenities: ['AC', 'WiFi', 'Smart TV', 'Hot Water'], badge: 'Most Popular' },
@@ -64,7 +67,6 @@ function Stars({ n }) {
 
 export default function Home() {
   const [reviews, setReviews] = useState(MOCK_REVIEWS);
-  const [activeReview, setActiveReview] = useState(0);
   const [featuredMenu, setFeaturedMenu] = useState([]);
 
   useEffect(() => {
@@ -75,8 +77,6 @@ export default function Home() {
     api.get('/feedback/public/approved').then(res => {
       if (res.data.data?.length) setReviews(res.data.data.slice(0, 3));
     }).catch(() => {});
-    const t = setInterval(() => setActiveReview(p => (p + 1) % MOCK_REVIEWS.length), 5000);
-    return () => clearInterval(t);
   }, []);
 
   return (
@@ -84,57 +84,40 @@ export default function Home() {
       <Navbar />
 
       {/* ── 1. HERO ──────────────────────────────────────── */}
-      <section className="relative h-screen min-h-[600px] max-h-[920px] flex items-end overflow-hidden bg-charcoal-900">
-        {/* Rich dark background with gold radial glow */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_60%,rgba(201,162,39,0.16),transparent_58%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(201,162,39,0.07),transparent_50%)]" />
-          {/* Subtle geometric pattern */}
-          <div className="absolute inset-0 opacity-[0.04]"
-            style={{backgroundImage:`url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 5L95 27.5V72.5L50 95L5 72.5V27.5L50 5z' fill='none' stroke='%23C9A227' stroke-width='1'/%3E%3C/svg%3E")`, backgroundSize:'120px 120px'}} />
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 w-full pb-20 md:pb-28">
-          <div className="container-lux">
-            <div className="max-w-2xl">
-              <p className="eyebrow text-gold-400 mb-6 anim-fade-up anim-delay-1">
-                Jodhpur Road · Ghumti · Pali, Rajasthan
-              </p>
-              <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-light text-white leading-[0.93] tracking-tight mb-6 anim-fade-up anim-delay-2">
-                Shivam<br />
-                <span className="text-gold-400 italic">Resort &</span><br />
-                Restaurant
-              </h1>
-              <p className="font-serif text-xl md:text-2xl text-cream-100/60 italic font-light mb-10 anim-fade-up anim-delay-3">
-                A new experience. A new destination.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 anim-fade-up anim-delay-4">
-                <Link to="/reserve-room" className="btn-primary">Book Your Stay</Link>
-                <Link to="/menu" className="btn-outline light">Explore Menu</Link>
-              </div>
+      <section className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
+        <HeroSlider />
+        
+        <div className="container-lux relative z-10 text-center">
+          <Reveal>
+            <p className="eyebrow text-gold-400 mb-6 tracking-[0.3em]">Jodhpur Road · Pali</p>
+            <h1 className="font-serif text-6xl md:text-[100px] font-bold text-white leading-[0.9] mb-8">
+              Shivam<br />
+              <span className="text-gold-400">Resort & Restaurant</span>
+            </h1>
+            <p className="text-xl md:text-3xl text-white/90 italic font-light mb-12 max-w-2xl mx-auto">
+              A premium luxury destination for retreats, events, and fine dining.
+            </p>
+            
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16 text-white">
+              {['1200+ Guest Capacity', 'Luxury Rooms', '100% Pure Veg', 'Wedding & Events'].map(stat => (
+                <div key={stat} className="border-t border-white/20 pt-4">
+                  <p className="font-sans text-sm tracking-widest uppercase text-gold-400">{stat}</p>
+                </div>
+              ))}
             </div>
-            <div className="mt-12 max-w-3xl anim-fade-up anim-delay-4">
-              {/* <QuickBook /> */}
+
+            {/* CTAs */}
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link to="/reserve-room" className="btn-primary">Book Rooms</Link>
+              <Link to="/contact" className="btn-outline light">Book Venue</Link>
+              <Link to="/reserve-table" className="btn-primary">Reserve Table</Link>
+              <Link to="/menu" className="btn-outline light">Explore Menu</Link>
             </div>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30 animate-bounce z-10">
-          <span className="font-sans text-[8px] tracking-[0.3em] uppercase">Scroll</span>
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-
-        {/* Vertical label right */}
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center gap-3 text-gold-400/30">
-          <div className="h-20 w-px bg-current" />
-          <span className="font-sans text-[8px] tracking-[0.4em] uppercase rotate-90 my-4 whitespace-nowrap">Est 2026</span>
-          <div className="h-20 w-px bg-current" />
+          </Reveal>
         </div>
       </section>
+
 
       {/* ── 2. ABOUT ─────────────────────────────────────── */}
       <section className="section bg-ivory">
@@ -254,10 +237,10 @@ export default function Home() {
       <section className="section bg-charcoal-900 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,rgba(201,162,39,0.1),transparent_60%)]" />
         <div className="container-lux relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <Reveal>
               <p className="eyebrow text-gold-400 mb-4">Dining Experience</p>
-              <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-light text-white leading-tight mb-5">
+              <h2 className="font-serif text-3xl sm:text-5xl md:text-6xl font-light text-white leading-tight mb-5">
                 Pure Veg<br />
                 <span className="text-gold-400 italic">& Jain</span><br />
                 Cuisine
@@ -268,7 +251,7 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-2.5 mb-8">
                 {['100% Vegetarian','Jain Options','Fresh Daily','No Onion/Garlic options'].map(t => (
-                  <span key={t} className="flex items-center gap-1.5 font-sans text-[10px] tracking-wide text-gold-300 border border-gold-400/25 px-3 py-1.5">
+                  <span key={t} className="flex items-center gap-1.5 font-sans text-[10px] tracking-wide text-gold-300 border border-gold-400/25 px-2 py-1">
                     <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                     {t}
                   </span>
@@ -278,7 +261,7 @@ export default function Home() {
             </Reveal>
 
             {/* Menu items list */}
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {(featuredMenu.length ? featuredMenu : [
                 {name:'Shivam Special Thali',price:450,category:'Specials',description:'A royal spread of seasonal curries, dal, breads, rice and dessert'},
                 {name:'Paneer Butter Masala',price:320,category:'Main Course',description:'Cottage cheese in velvety tomato-butter gravy'},
@@ -288,12 +271,12 @@ export default function Home() {
                 {name:'Mango Lassi',price:120,category:'Beverages',description:'Creamy yogurt drink blended with Rajasthani mango'},
               ]).map((item, i) => (
                 <Reveal key={item.name} delay={i * 0.07}>
-                  <div className="flex items-center gap-4 bg-white/5 border border-white/8 p-4 hover:bg-white/9 hover:border-gold-400/25 transition-all duration-300 group">
-                    <div className="w-10 h-10 bg-gold-400/10 border border-gold-400/20 flex-shrink-0 flex items-center justify-center text-base">🍽️</div>
+                  <div className="flex items-center gap-3 bg-white/5 border border-white/8 p-3 hover:bg-white/9 hover:border-gold-400/25 transition-all duration-300 group">
+                    <div className="w-8 h-8 bg-gold-400/10 border border-gold-400/20 flex-shrink-0 flex items-center justify-center text-xs">🍽️</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                        <p className="font-serif text-base text-white">{item.name}</p>
-                        <span className="font-sans text-[9px] tracking-wide text-green-400 border border-green-400/30 px-2 py-0.5">Veg</span>
+                        <p className="font-serif text-base sm:text-lg text-white">{item.name}</p>
+                        <span className="font-sans text-[10px] tracking-wide text-green-400 border border-green-400/30 px-1.5 py-0.5">Veg</span>
                       </div>
                       <p className="font-sans text-xs text-cream-100/35 truncate">{item.description}</p>
                     </div>
@@ -302,7 +285,7 @@ export default function Home() {
                 </Reveal>
               ))}
               <Reveal delay={0.4}>
-                <Link to="/menu" className="flex items-center justify-center gap-2 py-3 border border-gold-400/25 text-gold-400 font-sans text-[10px] tracking-[0.2em] uppercase hover:bg-gold-400 hover:text-charcoal-900 transition-all duration-300">
+                <Link to="/menu" className="flex items-center justify-center gap-2 py-3 border border-gold-400/25 text-gold-400 font-sans text-[12px] tracking-[0.2em] uppercase hover:bg-gold-400 hover:text-charcoal-900 transition-all duration-300">
                   View Complete Menu →
                 </Link>
               </Reveal>
@@ -311,7 +294,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 5. DIGITAL MENU PREVIEW ──────────────────────── */}
+      {/* ── 5. DIGITAL MENU PREVIEW ────────────────────────
       <section className="section-sm bg-ivory">
         <div className="container-lux">
           <SectionHeading eyebrow="Digital Menu" title="Featured Selections" />
@@ -348,59 +331,37 @@ export default function Home() {
             <Link to="/menu" className="btn-ghost text-gold-500 hover:text-gold-600">Browse Full Menu</Link>
           </Reveal>
         </div>
-      </section>
-
+      </section> */}
+{/* happy */}
       {/* ── 6. HAPPY CUSTOMERS ───────────────────────────── */}
       <section className="section bg-cream-100">
         <div className="container-lux">
           <SectionHeading eyebrow="Guest Experiences" title="Happy Customers"
             subtitle="Real words from our valued guests." />
 
-          {/* Featured rotating review */}
-          <div className="relative max-w-3xl mx-auto text-center mb-12 min-h-[160px]">
-            {reviews.map((r, i) => (
-              <div key={r.name || i} className="transition-all duration-700"
-                style={{ opacity: activeReview === i ? 1 : 0, position: activeReview === i ? 'relative' : 'absolute', top:0, left:0, right:0 }}>
-                <div className="text-gold-400 font-serif text-6xl leading-none mb-3">"</div>
-                <p className="font-serif text-xl sm:text-2xl md:text-3xl text-charcoal-700 font-light italic leading-relaxed mb-5">
-                  {r.review || r.text}
-                </p>
-                <Stars n={r.rating} />
-                <div className="mt-3">
-                  <p className="font-sans text-sm font-medium text-charcoal-800 tracking-wide">{r.name || r.customerName}</p>
-                  <p className="font-sans text-xs text-charcoal-400">{r.location} · {r.date || new Date(r.visitDate||Date.now()).toLocaleDateString('en-IN',{month:'short',year:'numeric'})}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Dots */}
-          <div className="flex justify-center gap-2 mb-12">
-            {reviews.map((_, i) => (
-              <button key={i} onClick={() => setActiveReview(i)}
-                className={`transition-all duration-300 ${i === activeReview ? 'w-8 h-1.5 bg-gold-400' : 'w-1.5 h-1.5 rounded-full bg-charcoal-200'}`} />
-            ))}
-          </div>
-
-          {/* Review cards */}
-          <div className="grid sm:grid-cols-3 gap-5">
-            {reviews.map((r, i) => (
-              <Reveal key={r.name || i} delay={i * 0.1}>
-                <div className="bg-white border border-cream-200 p-6 hover:border-gold-300 transition-all duration-300 h-full flex flex-col">
-                  <Stars n={r.rating} />
-                  <p className="font-serif text-sm text-charcoal-600 italic leading-relaxed mt-3 mb-4 flex-1">"{r.review || r.text}"</p>
-                  <div className="flex items-center gap-3 pt-4 border-t border-cream-100">
-                    <div className="w-9 h-9 bg-gold-gradient flex items-center justify-center font-serif text-charcoal-900 font-semibold text-sm flex-shrink-0">
-                      {(r.name || r.customerName || 'G').charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-sans text-xs font-medium text-charcoal-800">{r.name || r.customerName}</p>
-                      <p className="font-sans text-[10px] text-charcoal-400">{r.location} · {r.date || new Date(r.visitDate||Date.now()).toLocaleDateString('en-IN',{month:'short',year:'numeric'})}</p>
+          <div className="grid lg:grid-cols-3 gap-10">
+            <div className="lg:col-span-2 grid sm:grid-cols-2 gap-5">
+              {reviews.map((r, i) => (
+                <Reveal key={r.name || i} delay={i * 0.1}>
+                  <div className="bg-white border border-cream-200 p-6 hover:border-gold-300 transition-all duration-300 h-full flex flex-col">
+                    <Stars n={r.rating} />
+                    <p className="font-serif text-sm text-charcoal-600 italic leading-relaxed mt-3 mb-4 flex-1">"{r.review || r.text}"</p>
+                    <div className="flex items-center gap-3 pt-4 border-t border-cream-100">
+                      <div className="w-9 h-9 bg-gold-gradient flex items-center justify-center font-serif text-charcoal-900 font-semibold text-sm flex-shrink-0">
+                        {(r.name || r.customerName || 'G').charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-sans text-xs font-medium text-charcoal-800">{r.name || r.customerName}</p>
+                        <p className="font-sans text-[10px] text-charcoal-400">{r.location} · {r.date || new Date(r.visitDate||Date.now()).toLocaleDateString('en-IN',{month:'short',year:'numeric'})}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Reveal>
-            ))}
+                </Reveal>
+              ))}
+            </div>
+            <div className="lg:col-span-1">
+              <ReviewForm />
+            </div>
           </div>
         </div>
       </section>
@@ -421,15 +382,13 @@ export default function Home() {
               {label:'Paneer Tikka',span:'col-span-1',h:'h-40'},
             ].map((item, i) => (
               <Reveal key={i} delay={i*0.07}
-                className={`${item.span} ${item.h} relative overflow-hidden bg-charcoal-800 group cursor-pointer`}>
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_60%,rgba(201,162,39,0.1),transparent_60%)]" />
-                <div className="absolute inset-0 flex items-center justify-center opacity-10 group-hover:opacity-25 transition-opacity duration-500">
-                  <svg width="50" height="50" viewBox="0 0 100 100" fill="rgba(201,162,39,0.9)">
-                    <path d="M50 10 C 55 25, 65 30, 75 28 C 65 35, 60 45, 50 55 C 40 45, 35 35, 25 28 C 35 30, 45 25, 50 10 Z" />
-                  </svg>
+                className={`${item.span} ${item.h} relative overflow-hidden bg-charcoal-800 group cursor-pointer rounded-lg shadow-luxury`}>
+                <div className="absolute inset-0 bg-gold-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform scale-110 group-hover:scale-100">
+                  <span className="font-serif text-2xl text-white">View</span>
                 </div>
-                <div className="absolute inset-0 bg-charcoal-900/0 group-hover:bg-charcoal-900/45 transition-all duration-400 flex items-end p-4">
-                  <p className="font-sans text-[10px] tracking-[0.18em] uppercase text-white opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">{item.label}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
+                  <p className="font-serif text-lg text-white font-medium tracking-wide">{item.label}</p>
                 </div>
               </Reveal>
             ))}
@@ -441,24 +400,19 @@ export default function Home() {
       </section>
 
       {/* ── 8. SPECIAL OFFERS ────────────────────────────── */}
-      <section className="section bg-ivory">
+      <section className="section bg-black">
         <div className="container-lux">
           <SectionHeading eyebrow="Exclusive" title="Special Offers"
-            subtitle="Crafted experiences for every celebration." />
+            subtitle="Crafted experiences for every celebration." light />
           <div className="grid md:grid-cols-3 gap-5">
             {OFFERS.map((offer, i) => (
               <Reveal key={offer.title} delay={i * 0.12}>
-                <div className={`relative overflow-hidden p-8 h-full flex flex-col hover:shadow-luxury transition-all duration-400 ${
-                  offer.featured ? 'bg-charcoal-900 text-white' : 'bg-white border border-cream-200'
-                }`}>
-                  {offer.featured && (
-                    <span className="absolute top-4 right-4 bg-gold-gradient text-charcoal-900 font-sans text-[9px] font-medium tracking-[0.15em] uppercase px-3 py-1">Popular</span>
-                  )}
+                <div className="relative overflow-hidden p-8 h-full flex flex-col bg-charcoal-900 text-white hover:shadow-luxury transition-all duration-400">
                   <div className="text-3xl mb-4">{offer.icon}</div>
-                  <p className={`eyebrow mb-2 ${offer.featured ? 'text-gold-400' : 'text-gold-500'}`}>{offer.sub}</p>
-                  <h3 className={`font-serif text-2xl font-light mb-3 ${offer.featured ? 'text-white' : 'text-charcoal-900'}`}>{offer.title}</h3>
-                  <p className={`font-sans text-sm font-light leading-relaxed flex-1 mb-6 ${offer.featured ? 'text-cream-100/55' : 'text-charcoal-400'}`}>{offer.desc}</p>
-                  <Link to="/contact" className={`btn-ghost ${offer.featured ? 'text-gold-400 hover:text-gold-300' : 'text-charcoal-600 hover:text-gold-500'}`}>
+                  <p className="eyebrow text-gold-400 mb-2">{offer.sub}</p>
+                  <h3 className="font-serif text-2xl font-light mb-3 text-white">{offer.title}</h3>
+                  <p className="font-sans text-sm font-light leading-relaxed flex-1 mb-6 text-cream-100/55">{offer.desc}</p>
+                  <Link to="/contact" className="btn-ghost text-gold-400 hover:text-gold-300">
                     Enquire Now
                   </Link>
                 </div>

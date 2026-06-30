@@ -3,10 +3,10 @@ import api from '../api/axios';
 
 const STATUSES = ['All','Pending','Confirmed','Cancelled','Completed'];
 const STATUS_STYLE = {
-  Pending:   'bg-amber-50 text-amber-700 border border-amber-200',
-  Confirmed: 'bg-green-50 text-green-700 border border-green-200',
-  Cancelled: 'bg-red-50 text-red-700 border border-red-200',
-  Completed: 'bg-blue-50 text-blue-700 border border-blue-200',
+  Pending:   'bg-amber-200 text-amber-700 border border-amber-200',
+  Confirmed: 'bg-green-200 text-green-700 border border-green-200',
+  Cancelled: 'bg-red-200 text-red-700 border border-red-200',
+  Completed: 'bg-blue-200 text-blue-700 border border-blue-200',
 };
 
 export default function AdminTableReservations() {

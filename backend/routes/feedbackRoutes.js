@@ -71,4 +71,22 @@ router.get('/public/approved', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// POST /api/feedback/submit-general — new public review
+router.post('/submit-general', async (req, res, next) => {
+  try {
+    const { customerName, rating, review } = req.body;
+    if (!customerName || !rating || !review) return res.status(400).json({ success: false, message: 'All fields required' });
+    
+    const fb = new Feedback({
+      customerName,
+      rating,
+      review,
+      status: 'pending',
+      visitDate: new Date(),
+    });
+    await fb.save();
+    res.json({ success: true, message: 'Thank you for your feedback!' });
+  } catch (err) { next(err); }
+});
+
 export default router;

@@ -1,88 +1,119 @@
 import PDFDocument from 'pdfkit';
+import QRCode from 'qrcode';
 
-export const generateInvoicePDF = (invoice) => {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: 'A4', margin: 40 });
+const convertNumberToWords = (num) => {
+  const a = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+  const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+  if ((num = Math.floor(num).toString()).length > 9) return 'overflow';
+  let n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+  if (!n) return '';
+  let str = '';
+  str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'crore ' : '';
+  str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'lakh ' : '';
+  str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'thousand ' : '';
+  str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'hundred ' : '';
+  str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+  return str.trim() + ' only';
+};
+
+export const generateInvoicePDF = async (invoice) => {
+  return new Promise(async (resolve, reject) => {
+    const doc = new PDFDocument({ size: 'A4', margin: 30 });
     const chunks = [];
-
     doc.on('data', (chunk) => chunks.push(chunk));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
 
-    const gold = '#C99B3F';
-    const dark = '#141414';
-    const gray = '#666666';
+    const gold = '#B8860B';
+    const dark = '#000000';
+    const light = '#FFFFFF';
+    const grey = '#F5F5F5';
 
     // Header
-    doc.rect(0, 0, doc.page.width, 100).fill(dark);
-    doc.fillColor(gold).font('Helvetica-Bold').fontSize(28).text('SHIVAM', 40, 30);
-    doc.fillColor('#FFFFFF').font('Helvetica').fontSize(11).text('RESTAURANT & RESORT', 40, 62);
-    doc.fillColor(gold).fontSize(9).text('Jodhpur Road, Ghumti, Pali, Rajasthan', 40, 78);
+    doc.rect(0, 0, doc.page.width, 180).fill(dark);
+    doc.fillColor(gold).font('Helvetica-Bold').fontSize(32).text('SHIVAM', 40, 40);
+    doc.fillColor(light).font('Helvetica').fontSize(14).text('RESORT & RESTAURANT', 40, 75);
+    doc.fillColor(light).font('Helvetica').fontSize(9)
+       .text((invoice.restaurantAddress || 'Jodhpur Road, Ghumti, Pali, Rajasthan').toUpperCase(), 40, 100)
+       .text(`Phone: +91 99999 99999 | Email: info@shivamresort.com | Web: www.shivamresort.com`, 40, 115)
+       .text(`GSTIN: ${invoice.gstin || '24AAAAA0000A1Z5'} | FSSAI: ${invoice.fssai || '12345678901234'}`, 40, 130);
 
-    doc.fillColor('#FFFFFF').fontSize(9).text(`Invoice #${invoice.invoiceNumber}`, 380, 35, { align: 'right', width: 175 });
-    doc.fillColor(gold).text(new Date(invoice.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }), 380, 52, { align: 'right', width: 175 });
+    doc.fillColor(light).font('Helvetica-Bold').fontSize(24).text('INVOICE', 400, 40, { align: 'right' });
+    doc.fillColor(gold).font('Helvetica').fontSize(10).text(`No: ${invoice.invoiceNumber}`, 400, 70, { align: 'right' });
 
-    // Customer & table info
-    doc.fillColor(dark).font('Helvetica-Bold').fontSize(11).text('BILL TO', 40, 120);
-    doc.moveTo(40, 135).lineTo(200, 135).lineWidth(1).strokeColor(gold).stroke();
+    // Details Grid
+    const yInfo = 200;
+    doc.fillColor(dark).font('Helvetica-Bold').fontSize(10).text('BILL TO:', 40, yInfo);
     doc.fillColor(dark).font('Helvetica').fontSize(10)
-      .text(invoice.customerName, 40, 142)
-      .text(`Phone: ${invoice.customerPhone}`, 40, 158);
+       .text(`${invoice.customerName}`, 40, yInfo + 15)
+       .text(`Ph: ${invoice.customerPhone}`, 40, yInfo + 30);
 
-    if (invoice.tableNumber) {
-      doc.fillColor(dark).font('Helvetica-Bold').fontSize(11).text('TABLE INFO', 320, 120);
-      doc.moveTo(320, 135).lineTo(555, 135).lineWidth(1).strokeColor(gold).stroke();
-      doc.fillColor(dark).font('Helvetica').fontSize(10)
-        .text(`Table Number: ${invoice.tableNumber}`, 320, 142);
-    }
+    doc.fillColor(dark).font('Helvetica-Bold').fontSize(10).text('ORDER INFO:', 300, yInfo);
+    doc.font('Helvetica').fontSize(10)
+       .text(`Date: ${new Date(invoice.createdAt).toLocaleDateString()}`, 300, yInfo + 15)
+       .text(`Table: ${invoice.tableNumber || '-'} | Guests: 2`, 300, yInfo + 30);
 
-    // Items table header
-    const tableTop = 200;
-    doc.rect(40, tableTop, 515, 24).fill(dark);
-    doc.fillColor(gold).font('Helvetica-Bold').fontSize(9)
-      .text('ITEM', 50, tableTop + 8)
-      .text('QTY', 330, tableTop + 8, { width: 50, align: 'center' })
-      .text('PRICE', 390, tableTop + 8, { width: 70, align: 'right' })
-      .text('TOTAL', 470, tableTop + 8, { width: 80, align: 'right' });
+    // Items Table
+    const tableTop = 270;
+    doc.rect(40, tableTop, 520, 25).fill(grey);
+    doc.fillColor(dark).font('Helvetica-Bold').fontSize(9)
+       .text('ITEM', 50, tableTop + 8)
+       .text('QTY', 300, tableTop + 8, { width: 50, align: 'center' })
+       .text('PRICE', 360, tableTop + 8, { width: 60, align: 'right' })
+       .text('GST%', 430, tableTop + 8, { width: 40, align: 'right' })
+       .text('TOTAL', 490, tableTop + 8, { width: 70, align: 'right' });
 
-    // Items
-    let y = tableTop + 30;
+    let y = tableTop + 35;
     invoice.items.forEach((item, i) => {
-      if (i % 2 === 0) doc.rect(40, y - 4, 515, 20).fill('#F7F0DE');
       doc.fillColor(dark).font('Helvetica').fontSize(9)
-        .text(item.name, 50, y, { width: 270 })
-        .text(item.quantity.toString(), 330, y, { width: 50, align: 'center' })
-        .text(`Rs.${Number(item.price || 0).toFixed(2)}`, 390, y, { width: 70, align: 'right' })
-        .text(`Rs.${Number(item.total || 0).toFixed(2)}`, 470, y, { width: 80, align: 'right' });
+         .text(item.name, 50, y, { width: 250 })
+         .text(item.quantity.toString(), 300, y, { width: 50, align: 'center' })
+         .text(`₹${Number(item.price).toFixed(2)}`, 360, y, { width: 60, align: 'right' })
+         .text(`${invoice.gstRate || 5}%`, 430, y, { width: 40, align: 'right' })
+         .text(`₹${Number(item.total).toFixed(2)}`, 490, y, { width: 70, align: 'right' });
       y += 20;
     });
 
-    // Totals
-    const totalsY = y + 15;
-    doc.moveTo(350, totalsY - 5).lineTo(555, totalsY - 5).lineWidth(0.5).strokeColor(gold).stroke();
+    // Summary
+    const sumY = y + 20;
+    doc.moveTo(40, sumY).lineTo(560, sumY).stroke(gold);
 
-    doc.fillColor(gray).font('Helvetica').fontSize(10)
-      .text('Subtotal', 350, totalsY, { width: 130, align: 'left' })
-      .text(`Rs.${Number(invoice.subtotal || 0).toFixed(2)}`, 480, totalsY, { width: 75, align: 'right' });
+    const rightCol = 520;
+    let sY = sumY + 15;
+    const row = (l, v) => {
+        doc.font('Helvetica').fontSize(9).text(l, 350, sY, { width: 130, align: 'right' })
+           .text(`₹${Number(v).toFixed(2)}`, 450, sY, { width: 70, align: 'right' });
+        sY += 18;
+    };
+    row('Subtotal', invoice.subtotal);
+    row('Discount', invoice.discount || 0);
+    row('Taxable Amount', invoice.taxableAmount || (invoice.subtotal - (invoice.discount || 0)));
+    row('CGST (2.5%)', (invoice.gstAmount || 0) / 2);
+    row('SGST (2.5%)', (invoice.gstAmount || 0) / 2);
+    row('Service Charge', invoice.serviceCharge || 0);
 
-    doc.text(`GST (${invoice.gstRate}%)`, 350, totalsY + 18, { width: 130 })
-      .text(`Rs.${Number(invoice.gstAmount || 0).toFixed(2)}`, 480, totalsY + 18, { width: 75, align: 'right' });
+    doc.rect(350, sY + 5, 210, 35).fill(dark);
+    doc.fillColor(gold).font('Helvetica-Bold').fontSize(14)
+       .text('GRAND TOTAL:', 350, sY + 14, { width: 130, align: 'right' })
+       .text(`₹${Number(invoice.total).toFixed(2)}`, 450, sY + 14, { width: 70, align: 'right' });
 
-    doc.rect(350, totalsY + 36, 205, 26).fill(dark);
-    doc.fillColor(gold).font('Helvetica-Bold').fontSize(12)
-      .text('TOTAL', 360, totalsY + 42, { width: 100 })
-      .text(`Rs.${Number(invoice.total || 0).toFixed(2)}`, 460, totalsY + 42, { width: 90, align: 'right' });
+    doc.fillColor(dark).font('Helvetica-Oblique').fontSize(8)
+       .text(`In words: ${convertNumberToWords(invoice.total)}`, 40, sY + 50);
 
-    // Payment
-    doc.fillColor(gray).font('Helvetica').fontSize(9)
-      .text(`Payment Method: ${(invoice.paymentMethod || 'cash').toUpperCase()}`, 40, totalsY + 50);
+    // Payment Info
+    doc.font('Helvetica-Bold').fontSize(9).text('PAYMENT INFO:', 40, sY + 70);
+    doc.font('Helvetica').fontSize(9)
+       .text(`Method: ${invoice.paymentMethod || 'Cash'} | Status: ${invoice.paymentStatus || 'Paid'}`, 40, sY + 85)
+       .text(`Verified By: Admin | Time: ${new Date(invoice.paidAt).toLocaleString()}`, 40, sY + 100);
+
+    // QR
+    const qrCode = await QRCode.toDataURL(`Invoice:${invoice.invoiceNumber}`);
+    doc.image(qrCode, 450, sY + 60, { width: 70 });
 
     // Footer
-    const footerY = doc.page.height - 80;
-    doc.moveTo(40, footerY).lineTo(555, footerY).lineWidth(0.5).strokeColor(gold).stroke();
-    doc.fillColor(gray).font('Helvetica').fontSize(8)
-      .text('Thank you for dining with us!', 40, footerY + 10, { align: 'center', width: 515 })
-      .text('Shivam Restaurant | @shivam_resort_pali | Jodhpur Road, Pali', 40, footerY + 24, { align: 'center', width: 515 });
+    doc.fillColor(dark).fontSize(8).font('Helvetica-Bold')
+       .text('Thank You for Visiting Shivam Resort & Restaurant', 40, doc.page.height - 70, { align: 'center', width: 520 })
+       .text('Visit Again | Prices Inclusive of GST | This is a Computer Generated Invoice', 40, doc.page.height - 55, { align: 'center', width: 520 });
 
     doc.end();
   });

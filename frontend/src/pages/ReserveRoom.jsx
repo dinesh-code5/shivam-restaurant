@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Reveal from '../components/Reveal';
+import ImageSlider from '../components/ImageSlider';
 import api from '../api/axios';
 
 const ROOM_TYPES = [
@@ -26,7 +27,17 @@ export default function ReserveRoom() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  
+  const oneMonthLater = new Date();
+  oneMonthLater.setMonth(today.getMonth() + 1);
+  const oneMonthLaterStr = oneMonthLater.toISOString().split('T')[0];
+
+  const checkInDate = checkIn ? new Date(checkIn) : null;
+  const minCheckOut = checkInDate ? new Date(checkInDate.getTime() + 86400000).toISOString().split('T')[0] : todayStr;
+  const maxCheckOut = checkInDate ? new Date(checkInDate.getTime() + 4 * 86400000).toISOString().split('T')[0] : '';
+  
   const nights = checkIn && checkOut ? Math.max(1, Math.ceil((new Date(checkOut) - new Date(checkIn)) / 86400000)) : 1;
   const subtotal = selected ? selected.price * nights : 0;
   const gst = Math.round(subtotal * 0.12);
@@ -85,11 +96,12 @@ export default function ReserveRoom() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-cream-100 pt-20">
+      <div className="min-h-screen bg-cream-100">
 
         {/* Header */}
-        <div className="bg-charcoal-900 py-14 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgba(201,162,39,0.1),transparent_60%)]" />
+        <div className="relative h-[400px] flex items-center justify-center text-center overflow-hidden">
+          <img src="/bg-rooms.jpg" alt="Rooms Background" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-[rgba(0,0,0,0.45)]" />
           <div className="relative z-10">
             <p className="eyebrow text-gold-400 mb-2">Accommodations</p>
             <h1 className="font-serif text-4xl sm:text-5xl font-light text-white">Plan Your Stay</h1>
@@ -138,18 +150,18 @@ export default function ReserveRoom() {
                 {/* Dates */}
                 <div className="bg-white border border-cream-200 p-6 mb-5">
                   <h3 className="font-serif text-lg text-charcoal-900 mb-5">When are you visiting?</h3>
-                  <div className="grid sm:grid-cols-3 gap-6">
-                    <div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+                    <div className="col-span-1">
                       <label className="label-luxury">Check In</label>
-                      <input type="date" min={today} value={checkIn} onChange={e => setCheckIn(e.target.value)} className="input-luxury" />
+                      <input type="date" min={todayStr} max={oneMonthLaterStr} value={checkIn} onChange={e => setCheckIn(e.target.value)} className="input-luxury" />
                       {errors.checkIn && <p className="font-sans text-xs text-red-500 mt-1">{errors.checkIn}</p>}
                     </div>
-                    <div>
+                    <div className="col-span-1">
                       <label className="label-luxury">Check Out</label>
-                      <input type="date" min={checkIn || today} value={checkOut} onChange={e => setCheckOut(e.target.value)} className="input-luxury" />
+                      <input type="date" min={minCheckOut} max={maxCheckOut} value={checkOut} onChange={e => setCheckOut(e.target.value)} className="input-luxury" />
                       {errors.checkOut && <p className="font-sans text-xs text-red-500 mt-1">{errors.checkOut}</p>}
                     </div>
-                    <div>
+                    <div className="col-span-2 sm:col-span-1">
                       <label className="label-luxury">Guests</label>
                       <select value={guests} onChange={e => setGuests(e.target.value)} className="input-luxury">
                         {[1,2,3,4,5,6,8,10,15,20].map(n => <option key={n} value={n}>{n} {n===1?'Guest':'Guests'}</option>)}
@@ -159,10 +171,11 @@ export default function ReserveRoom() {
                 </div>
 
                 {/* Room options */}
-                <div>
-                  <h3 className="font-serif text-lg text-charcoal-900 mb-4">Select Room Type</h3>
-                  {errors.room && <p className="font-sans text-xs text-red-500 mb-3">{errors.room}</p>}
-                  <div className="space-y-3">
+                <div className="bg-white p-6 border border-cream-200">
+                  <h3 className="font-serif text-lg text-charcoal-900 mb-4">Explore Our Rooms</h3>
+                  <ImageSlider images={['/rooms/deluxe-room.jpg', '/rooms/premium-suite.jpg', '/rooms/family-room.jpg']} />
+                  <div className="mt-6 space-y-3">
+                    {errors.room && <p className="font-sans text-xs text-red-500 mb-3">{errors.room}</p>}
                     {ROOM_TYPES.map(room => (
                       <div key={room.value} onClick={() => setSelected(room)}
                         className={`bg-white border-2 p-5 cursor-pointer transition-all duration-300 hover:border-gold-300 ${
@@ -290,9 +303,17 @@ export default function ReserveRoom() {
                 <p className="font-sans text-sm text-charcoal-400 font-light">Select a room to see your booking summary.</p>
               ) : (
                 <div className="space-y-2.5">
-                  <div className="bg-gold-gradient -mx-6 -mt-5 mb-5 px-6 py-4">
-                    <p className="font-serif text-xl text-charcoal-900">{selected.label}</p>
-                    <p className="font-sans text-xs text-charcoal-700 mt-0.5">{selected.size} · {selected.cap} guests</p>
+                  <div className="bg-gold-gradient -mx-6 -mt-5 mb-5 overflow-hidden">
+                    <img 
+                        src={`/rooms/${selected.label.toLowerCase().replace(' ', '-')}.jpg`} 
+                        alt={selected.label} 
+                        className="w-full h-40 object-cover"
+                        onError={(e) => e.target.src = '/placeholder-room.jpg'}
+                    />
+                    <div className="px-6 py-4">
+                        <p className="font-serif text-xl text-charcoal-900">{selected.label}</p>
+                        <p className="font-sans text-xs text-charcoal-700 mt-0.5">{selected.size} · {selected.cap} guests</p>
+                    </div>
                   </div>
                   {[
                     ['Check In', checkIn || '—'],

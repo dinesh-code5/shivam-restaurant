@@ -65,7 +65,7 @@ export default function Menu() {
           <div className="flex items-center gap-1 overflow-x-auto py-3 scrollbar-hide">
             {CATEGORIES.map(cat => (
               <button key={cat} onClick={() => setActiveCategory(cat)}
-                className={`flex-shrink-0 font-sans text-[10px] tracking-[0.15em] uppercase px-4 py-2 transition-all duration-200 ${
+                className={`flex-shrink-0 font-sans text-[12px] tracking-[0.15em] uppercase px-4 py-2 transition-all duration-200 ${
                   activeCategory === cat ? 'bg-gold-gradient text-charcoal-900 font-medium' : 'text-charcoal-400 hover:text-charcoal-800'
                 }`}>
                 {cat}
@@ -77,7 +77,7 @@ export default function Menu() {
                   className={`w-9 h-5 rounded-full transition-all duration-300 relative cursor-pointer ${jainOnly ? 'bg-gold-400' : 'bg-cream-300'}`}>
                   <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${jainOnly ? 'left-4' : 'left-0.5'}`} />
                 </div>
-                <span className="font-sans text-[10px] tracking-[0.15em] uppercase text-charcoal-500">Jain</span>
+                <span className="font-sans text-[12px] tracking-[0.15em] uppercase text-charcoal-500">Jain</span>
               </label>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function Menu() {
             <div className="flex justify-center py-20"><div className="spinner" /></div>
           ) : Object.keys(grouped).length === 0 ? (
             <div className="text-center py-20">
-              <p className="font-serif text-xl text-charcoal-400 italic">No items found for the selected filters.</p>
+              <p className="font-serif text-[22px] text-charcoal-400 italic">No items found for the selected filters.</p>
             </div>
           ) : (
             <div className="space-y-16">
@@ -100,7 +100,7 @@ export default function Menu() {
                   {/* Category heading */}
                   <div className="flex items-center gap-6 mb-8">
                     <div>
-                      <p className="eyebrow text-gold-500 mb-1">{category}</p>
+                      <p className="eyebrow text-[14px] text-gold-500 mb-1">{category}</p>
                       <div className="h-px w-14 bg-gold-300" />
                     </div>
                     <div className="flex-1 h-px bg-cream-200" />
@@ -115,18 +115,18 @@ export default function Menu() {
                               <div className="w-3.5 h-3.5 border flex items-center justify-center flex-shrink-0 border-green-600">
                                 <div className="w-2 h-2 rounded-full bg-green-600" />
                               </div>
-                              <span className="font-sans text-[10px] font-semibold tracking-wide text-green-700">{item.type === 'Vegan' ? 'Jain' : 'Veg'}</span>
+                              <span className="font-sans text-[12px] font-semibold tracking-wide text-green-700">{item.type === 'Vegan' ? 'Jain' : 'Veg'}</span>
                             </div>
-                            <p className="font-serif text-xl text-gold-500">₹{item.price}</p>
+                            <p className="font-serif text-[22px] text-gold-500">₹{item.price}</p>
                           </div>
-                          <h3 className="font-serif text-lg text-charcoal-900 font-medium mb-2 group-hover:text-gold-600 transition-colors">
+                          <h3 className="font-serif text-xl text-charcoal-900 font-medium mb-2 group-hover:text-gold-600 transition-colors">
                             {item.name}
                           </h3>
                           {item.description && (
-                            <p className="font-sans text-xs text-charcoal-400 font-light leading-relaxed flex-1">{item.description}</p>
+                            <p className="font-sans text-sm text-charcoal-400 font-light leading-relaxed flex-1">{item.description}</p>
                           )}
                           <div className="mt-4 pt-4 border-t border-cream-100">
-                            <p className="font-sans text-[9px] tracking-[0.15em] uppercase text-charcoal-300">{item.category}</p>
+                            <p className="font-sans text-[11px] tracking-[0.15em] uppercase text-charcoal-300">{item.category}</p>
                           </div>
                         </div>
                       </Reveal>

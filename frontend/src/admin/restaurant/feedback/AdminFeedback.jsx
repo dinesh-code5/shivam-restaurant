@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import api from '../../api/axios';
+import api from '../../../api/axios';
 
 const MOCK = [
   { _id:'1', customerName:'Rahul Sharma', rating:5, review:'Absolutely divine experience. The Shivam Special Thali is unlike anything else in Pali.', visitDate: new Date(), status:'approved', isFeatured:true },

@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { Alert } from '../components/Common';
+import NotificationBell from '../components/NotificationBell';
 
 const MOCK_TABLES = Array.from({ length: 10 }, (_, i) => ({
   _id: `t${i + 1}`,
@@ -38,6 +40,8 @@ const orderStatus = {
 };
 
 export default function WaiterPanel() {
+  const navigate = useNavigate();
+  const audioRef = useRef(new Audio('/bell.mp3'));
   const [step, setStep] = useState('tables');
   const [tables, setTables] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
@@ -71,6 +75,21 @@ export default function WaiterPanel() {
   };
 
   useEffect(() => { fetchAll(); }, []);
+
+  // Poll for ready KOTs
+  useEffect(() => {
+    const checkKOTs = async () => {
+        try {
+            const res = await api.get('/kot?status=ready');
+            const readyKOTs = res.data.data;
+            if (readyKOTs.length > 0) {
+                audioRef.current.play().catch(e => console.log('Autoplay blocked'));
+            }
+        } catch (err) {}
+    };
+    const iv = setInterval(checkKOTs, 10000);
+    return () => clearInterval(iv);
+  }, []);
 
   const resetToTables = () => {
     setStep('tables');
@@ -187,7 +206,7 @@ export default function WaiterPanel() {
 
   return (
     <div className="min-h-screen bg-cream-100 text-charcoal-900">
-      <header className="sticky top-0 z-30 bg-charcoal-950/96 backdrop-blur-xl text-cream-50 shadow-[0_10px_30px_rgba(0,0,0,0.28)]">
+      <header className="sticky top-0 z-30 bg-charcoal-950/96 backdrop-blur-xl  text-charcoal-900 shadow-[0_10px_30px_rgba(0,0,0,0.28)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             {step !== 'tables' && (
@@ -203,7 +222,9 @@ export default function WaiterPanel() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={fetchAll} className="btn-outline light px-4 py-2 text-[11px]">Refresh</button>
+            <NotificationBell />
+            <button onClick={() => navigate('/admin/dashboard')} className="btn-outline-dark px-4 py-2 text-[11px]">Admin</button>
+            <button onClick={fetchAll} className="btn-outline-dark px-4 py-2 text-[12px]">Refresh</button>
             <a href="/admin/kitchen" target="_blank" rel="noopener noreferrer" className="btn-gold px-4 py-2 text-[11px]">Kitchen</a>
           </div>
         </div>
@@ -230,11 +251,11 @@ export default function WaiterPanel() {
               </div>
             </div>
             {loading ? (
-              <div className="flex justify-center py-14"><div className="spinner" /></div>
+            <div className="flex justify-center py-14"><div className="spinner" /></div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                {tables.map((t) => (
-                  <button key={t._id} onClick={() => selectTable(t)}
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              {tables.map((t) => (
+                <button key={t._id} onClick={() => selectTable(t)}
                     className={`text-left rounded-lg border-2 p-4 min-h-[150px] transition-all hover:-translate-y-1 hover:shadow-luxury ${statusStyles[t.status] || statusStyles.available}`}>
                     <div className="flex items-start justify-between">
                       <p className="font-display text-4xl font-bold">T{t.number}</p>

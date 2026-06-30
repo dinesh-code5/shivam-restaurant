@@ -34,18 +34,34 @@ const AdminBilling = () => {
     fetchInvoices();
   };
 
+  const approvePayment = async (id) => {
+    if (!window.confirm('Approve payment?')) return;
+    try {
+        await api.put(`/invoices/${id}/approve-payment`);
+        fetchInvoices();
+    } catch (err) { alert('Approval failed.'); }
+  };
+
+  const rejectPayment = async (id) => {
+    if (!window.confirm('Reject payment?')) return;
+    try {
+        await api.put(`/invoices/${id}/reject-payment`);
+        fetchInvoices();
+    } catch (err) { alert('Rejection failed.'); }
+  };
+
   const openPDF = (id) => {
     if (offline) { alert('Connect backend to generate PDF invoices.'); return; }
     window.open(`${import.meta.env.VITE_API_URL}/invoices/${id}/pdf`, '_blank');
   };
 
-  const totalRevenue = invoices.reduce((s, inv) => s + inv.total, 0);
+  const totalRevenue = invoices.filter(inv => inv.paymentStatus === 'paid').reduce((s, inv) => s + inv.total, 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="font-display text-2xl font-bold text-charcoal-900">Billing & Invoices</h1>
-        <p className="text-charcoal-400 text-sm">{invoices.length} invoices</p>
+        <p className="text-charcoal-600 text-l">{invoices.length} invoices</p>
       </div>
 
       {offline && <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700 flex gap-2">⚠️ Demo Mode — showing sample invoices.</div>}
@@ -54,17 +70,15 @@ const AdminBilling = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <div className="card-luxury p-4 text-center">
           <p className="text-2xl font-display font-bold text-charcoal-900">₹{totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
-          <p className="text-xs text-charcoal-400 mt-1">Total Revenue (shown)</p>
+          <p className="text-xs text-charcoal-400 mt-1">Total Revenue (Paid)</p>
         </div>
         <div className="card-luxury p-4 text-center">
-          <p className="text-2xl font-display font-bold text-charcoal-900">{invoices.length}</p>
-          <p className="text-xs text-charcoal-400 mt-1">Total Invoices</p>
+          <p className="text-2xl font-display font-bold text-charcoal-900">{invoices.filter(i => i.paymentStatus === 'pending').length}</p>
+          <p className="text-xs text-charcoal-400 mt-1">Pending Verification</p>
         </div>
         <div className="card-luxury p-4 text-center col-span-2 sm:col-span-1">
-          <p className="text-2xl font-display font-bold text-charcoal-900">
-            ₹{(invoices.length ? totalRevenue / invoices.length : 0).toFixed(2)}
-          </p>
-          <p className="text-xs text-charcoal-400 mt-1">Avg. Bill Value</p>
+          <p className="text-2xl font-display font-bold text-charcoal-900">{invoices.length}</p>
+          <p className="text-xs text-charcoal-400 mt-1">Total Invoices</p>
         </div>
       </div>
 
@@ -84,41 +98,45 @@ const AdminBilling = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gold-gradient text-charcoal-900 text-xs font-semibold uppercase tracking-wide">
-                <th className="text-left px-4 py-3">Invoice #</th>
-                <th className="text-left px-4 py-3 hidden sm:table-cell">Customer</th>
-                <th className="text-left px-4 py-3 hidden md:table-cell">Table</th>
-                <th className="text-left px-4 py-3 hidden lg:table-cell">Payment</th>
+                <th className="text-left px-4 py-3">Customer / Table</th>
+                <th className="text-left px-4 py-3">Receipt</th>
+                <th className="text-left px-4 py-3">Status</th>
                 <th className="text-right px-4 py-3">Total</th>
-                <th className="text-left px-4 py-3 hidden xl:table-cell">Date</th>
-                <th className="text-right px-4 py-3">PDF</th>
+                <th className="text-right px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-cream-200">
               {invoices.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-12 text-charcoal-400">No invoices found.</td></tr>
+                <tr><td colSpan={5} className="text-center py-12 text-charcoal-400">No invoices found.</td></tr>
               ) : invoices.map((inv) => (
                 <tr key={inv._id} className="hover:bg-cream-100">
-                  <td className="px-4 py-3 font-mono font-semibold text-gold-700">{inv.invoiceNumber}</td>
-                  <td className="px-4 py-3 hidden sm:table-cell">
-                    <p className="font-medium text-charcoal-900">{inv.customerName}</p>
-                    <p className="text-xs text-charcoal-400">{inv.customerPhone}</p>
+                  <td className="px-4 py-3">
+                    <p className="font-semibold text-charcoal-900">{inv.customerName}</p>
+                    <p className="text-xs text-charcoal-500">Table: {inv.tableNumber || 'N/A'}</p>
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell">
-                    {inv.tableNumber ? `Table ${inv.tableNumber}` : '—'}
+                  <td className="px-4 py-3">
+                    {inv.receiptImage ? (
+                      <a href={`${import.meta.env.VITE_API_URL}${inv.receiptImage}`} target="_blank" rel="noreferrer" className="text-gold-700 underline text-xs">View Receipt</a>
+                    ) : '—'}
                   </td>
-                  <td className="px-4 py-3 hidden lg:table-cell">
-                    <span className="capitalize text-xs font-semibold px-2 py-0.5 rounded-full bg-gold-100 text-gold-700">{inv.paymentMethod}</span>
+                  <td className="px-4 py-3">
+                    <span className={`font-bold uppercase text-[10px] px-2 py-1 rounded ${inv.paymentStatus === 'pending' ? 'bg-amber-500 text-white' : inv.paymentStatus === 'rejected' ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}>
+                      {inv.paymentStatus}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-right font-bold text-charcoal-900">
                     ₹{inv.total?.toFixed(2)}
                   </td>
-                  <td className="px-4 py-3 hidden xl:table-cell text-charcoal-400 text-xs">
-                    {new Date(inv.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  </td>
                   <td className="px-4 py-3 text-right">
-                    <button onClick={() => openPDF(inv._id)} className="text-xs px-3 py-1 rounded bg-charcoal-900 text-gold-300 hover:bg-charcoal-800 transition-colors font-semibold">
-                      🖨️ Print
-                    </button>
+                    <div className="flex justify-end gap-1">
+                      {inv.paymentStatus === 'pending' && (
+                          <>
+                            <button onClick={() => approvePayment(inv._id)} title="Approve Payment" className="p-1.5 rounded bg-green-600 text-white hover:bg-green-700 transition-colors">✅</button>
+                            <button onClick={() => rejectPayment(inv._id)} title="Reject Payment" className="p-1.5 rounded bg-red-600 text-white hover:bg-red-700 transition-colors">❌</button>
+                          </>
+                      )}
+                      <button onClick={() => openPDF(inv._id)} title="Print/View PDF" className="p-1.5 rounded bg-charcoal-900 text-gold-300 hover:bg-charcoal-800 transition-colors">🖨️</button>
+                    </div>
                   </td>
                 </tr>
               ))}

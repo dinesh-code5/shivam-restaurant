@@ -29,7 +29,9 @@ export default function Navbar() {
   return (
     <>
       <nav className={`sticky top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        solid ? 'bg-charcoal-950/95 backdrop-blur-xl shadow-[0_12px_34px_rgba(0,0,0,0.24),0_1px_0_rgba(201,162,39,0.24)]' : 'bg-charcoal-950/45 backdrop-blur-sm'
+        solid 
+          ? 'bg-[rgba(17,17,17,0.92)] backdrop-blur-[18px] shadow-[0_12px_34px_rgba(0,0,0,0.24)]' 
+          : 'bg-[rgba(17,17,17,0.65)] backdrop-blur-[12px]'
       }`}>
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
@@ -39,7 +41,7 @@ export default function Navbar() {
               <span className="font-sc text-xl md:text-2xl font-semibold tracking-[0.14em] uppercase text-white transition-colors group-hover:text-gold-400">
                 Shivam
               </span>
-              <span className="font-sans text-[8px] tracking-[0.32em] uppercase text-gold-400 -mt-px">
+              <span className="font-sans text-[9px] tracking-[0.32em] uppercase text-gold-400 -mt-px">
                 Resort & Restaurant
               </span>
             </Link>
@@ -49,7 +51,7 @@ export default function Navbar() {
               {NAV_LINKS.map(l => (
                 <NavLink key={l.path} to={l.path}
                   className={({ isActive }) =>
-                    `relative font-sans text-[11px] tracking-[0.2em] uppercase transition-colors duration-200 group ${
+                    `relative font-sans text-[13px] tracking-[0.2em] uppercase transition-colors duration-200 group ${
                       isActive ? 'text-gold-400' : 'text-white/80 hover:text-gold-400'
                     }`
                   }>
@@ -60,13 +62,10 @@ export default function Navbar() {
             </div>
 
             {/* CTA + mobile toggle */}
-            <div className="flex items-center gap-4">
-              <Link to="/reserve-room"
-                className="hidden md:inline-flex btn-primary px-5 py-2.5 text-[11px]">
-                Book Now
-              </Link>
+            <div className="flex items-center gap-3">
+              
               <Link to="/admin/dashboard"
-                className="hidden md:inline-flex font-sans text-[10px] tracking-[0.18em] uppercase text-white/40 hover:text-gold-400 transition-colors">
+                className="hidden md:inline-flex font-sans text-[13px] tracking-[0.18em] uppercase text-charcoal-700 hover:text-gold-400 transition-colors">
                 Staff →
               </Link>
               <button onClick={() => setOpen(!open)}
@@ -81,7 +80,7 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         <div className={`lg:hidden overflow-hidden transition-all duration-400 ${open ? 'max-h-[28rem]' : 'max-h-0'}`}>
-          <div className="bg-charcoal-950/98 backdrop-blur-xl px-6 pb-6 pt-2 border-t border-gold-400/15 shadow-2xl">
+          <div className="bg-charcoal-950 px-6 pb-6 pt-2 border-t border-gold-400/15 shadow-2xl">
             {NAV_LINKS.map(l => (
               <NavLink key={l.path} to={l.path}
                 className={({ isActive }) =>
@@ -92,15 +91,17 @@ export default function Navbar() {
                 {l.name}
               </NavLink>
             ))}
-            <Link to="/reserve-room" className="btn-primary w-full mt-5 text-center">
-              Book Now
-            </Link>
           </div>
         </div>
       </nav>
 
+      {/* Sticky Mobile Book Now Button */}
+      <Link to="/reserve-room" className="sm:hidden fixed bottom-6 left-6 z-50 btn-primary px-6 py-3 text-[12px] shadow-lg">
+        Book Now
+      </Link>
+
       {/* WhatsApp FAB */}
-      <a href="https://wa.me/910000000000?text=Hello%20Shivam%20Resort!"
+      <a href="https://wa.me/9057254349?text=Hello%20Shivam%20Resort!"
         target="_blank" rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-[#25D366] flex items-center justify-center shadow-[0_4px_20px_rgba(37,211,102,0.5)] hover:scale-110 transition-transform duration-300"
         aria-label="Chat on WhatsApp">
