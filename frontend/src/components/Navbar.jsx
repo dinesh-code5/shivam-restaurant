@@ -65,7 +65,7 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               
               <Link to="/admin/dashboard"
-                className="hidden md:inline-flex font-sans text-[13px] tracking-[0.18em] uppercase text-charcoal-700 hover:text-gold-400 transition-colors">
+                className="hidden md:inline-flex font-sans text-[12px] tracking-[0.18em] uppercase text-white border border-gold-400/50 px-3 py-1.5 hover:bg-gold-400 hover:text-black transition-all">
                 Staff →
               </Link>
               <button onClick={() => setOpen(!open)}
