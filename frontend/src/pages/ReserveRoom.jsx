@@ -18,8 +18,12 @@ const STEPS = ['Select Room', 'Personal Details', 'Confirm Booking'];
 export default function ReserveRoom() {
   const [step, setStep] = useState(0);
   const [selected, setSelected] = useState(null);
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
+  const [checkIn, setCheckIn] = useState(new Date().toISOString().split('T')[0]);
+  const [checkOut, setCheckOut] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  });
   const [guests, setGuests] = useState(1);
   const [form, setForm] = useState({ name:'', phone:'', email:'', specialRequest:'' });
   const [errors, setErrors] = useState({});

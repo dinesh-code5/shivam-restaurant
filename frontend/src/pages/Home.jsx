@@ -40,31 +40,6 @@ function Stars({ n }) {
   );
 }
 
-// function QuickBook() {
-//   const today = new Date().toISOString().split('T')[0];
-//   return (
-//     <div className="glass-dark px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-5 items-end">
-//       <div>
-//         <label className="label-luxury text-cream-100/50">Check In</label>
-//         <input type="date" min={today} className="w-full bg-transparent border-b border-white/20 py-2 text-sm text-white focus:outline-none focus:border-gold-400 transition-colors font-sans font-light" />
-//       </div>
-//       <div>
-//         <label className="label-luxury text-cream-100/50">Check Out</label>
-//         <input type="date" min={today} className="w-full bg-transparent border-b border-white/20 py-2 text-sm text-white focus:outline-none focus:border-gold-400 transition-colors font-sans font-light" />
-//       </div>
-//       <div>
-//         <label className="label-luxury text-cream-100/50">Guests</label>
-//         <select className="w-full bg-transparent border-b border-white/20 py-2 text-sm text-white focus:outline-none appearance-none font-sans font-light">
-//           {[1,2,3,4,'5+'].map(n => <option key={n} value={n} className="bg-charcoal-900">{n} {n===1?'Guest':'Guests'}</option>)}
-//         </select>
-//       </div>
-//       <Link to="/reserve-room" className="btn-primary text-center text-[10px] py-3">
-//         Check Availability
-//       </Link>
-//     </div>
-//   );
-// }
-
 export default function Home() {
   const [reviews, setReviews] = useState(MOCK_REVIEWS);
   const [featuredMenu, setFeaturedMenu] = useState([]);
