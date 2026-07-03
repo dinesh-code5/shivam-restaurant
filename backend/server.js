@@ -95,53 +95,51 @@ cron.schedule('0 1 * * *', async () => {
   }
 });
   console.log('[CRON] Running daily WhatsApp automation...');
-  try {
-    const today = new Date();
-    const todayMD = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const in7Days = new Date(today); in7Days.setDate(today.getDate() + 7);
-    const in7MD = `${String(in7Days.getMonth() + 1).padStart(2, '0')}-${String(in7Days.getDate()).padStart(2, '0')}`;
+try {
+  const today = new Date();
+  const todayMD = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const in7Days = new Date(today); in7Days.setDate(today.getDate() + 7);
+  const in7MD = `${String(in7Days.getMonth() + 1).padStart(2, '0')}-${String(in7Days.getDate()).padStart(2, '0')}`;
 
-    const campaign = await BirthdayCampaign.findOne({ isEnabled: true });
-    const customers = await Customer.find({ phone: { $ne: '' } });
+  const campaign = await BirthdayCampaign.findOne({ isEnabled: true });
+  const customers = await Customer.find({ phone: { $ne: '' } });
 
-    for (const c of customers) {
-      if (!c.dob) continue;
-      const dobParts = c.dob.split('-'); // YYYY-MM-DD or DD-MM-YYYY
-      let md = '';
-      if (dobParts.length === 3) {
-        md = dobParts.length > 0 && dobParts[0].length === 4
-          ? `${dobParts[1]}-${dobParts[2]}`   // YYYY-MM-DD
-          : `${dobParts[1]}-${dobParts[0]}`;   // DD-MM-YYYY
-      }
-
-      if (md === todayMD && campaign) {
-        await sendBirthdayWish(c.phone, c.name, campaign.discountPercent);
-      } else if (md === in7MD && campaign) {
-        await sendBirthdayReminder(c.phone, c.name);
-      }
+  for (const c of customers) {
+    if (!c.dob) continue;
+    const dobParts = c.dob.split('-'); // YYYY-MM-DD or DD-MM-YYYY
+    let md = '';
+    if (dobParts.length === 3) {
+      md = dobParts.length > 0 && dobParts[0].length === 4
+        ? `${dobParts[1]}-${dobParts[2]}`   // YYYY-MM-DD
+        : `${dobParts[1]}-${dobParts[0]}`;   // DD-MM-YYYY
     }
 
-    // 7-day retention
-    const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(today.getDate() - 7);
-    const lapsedCustomers = await Customer.find({
-      lastVisit: { $lte: sevenDaysAgo },
-      $or: [
-        { lastRetentionSent: null },
-        { lastRetentionSent: { $lte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } }
-      ]
-    });
-
-    for (const c of lapsedCustomers) {
-      await sendRetentionMessage(c.phone, c.name);
-      c.lastRetentionSent = new Date();
-      await c.save();
+    if (md === todayMD && campaign) {
+      await sendBirthdayWish(c.phone, c.name, campaign.discountPercent);
+    } else if (md === in7MD && campaign) {
+      await sendBirthdayReminder(c.phone, c.name);
     }
+  }
 
+  // 7-day retention
+  const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(today.getDate() - 7);
+  const lapsedCustomers = await Customer.find({
+    lastVisit: { $lte: sevenDaysAgo },
+    $or: [
+      { lastRetentionSent: null },
+      { lastRetentionSent: { $lte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } }
+    ]
+  });
+
+  for (const c of lapsedCustomers) {
+    await sendRetentionMessage(c.phone, c.name);
+    c.lastRetentionSent = new Date();
+    await c.save();
+  }
     console.log(`[CRON] Done. Birthday checks: ${customers.length}, Retention: ${lapsedCustomers.length}`);
   } catch (err) {
     console.error('[CRON] Error:', err.message);
-  }
-});
+}
 
 app.use(notFound);
 app.use(errorHandler);
