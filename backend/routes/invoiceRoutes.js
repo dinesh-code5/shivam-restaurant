@@ -15,6 +15,7 @@ import crypto from 'crypto';
 
 const router = express.Router();
 
+/*
 // Cloudinary Configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -31,6 +32,7 @@ const storage = new CloudinaryStorage({
   },
 });
 const upload = multer({ storage });
+*/
 
 // GET /api/invoices
 router.get('/', protect, async (req, res, next) => {
@@ -77,6 +79,7 @@ router.put('/:id', protect, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+/*
 // PUT /api/invoices/:id/submit-payment - Waiter submits payment method + receipt
 router.put('/:id/submit-payment', protect, upload.single('receipt'), async (req, res, next) => {
   try {
@@ -94,6 +97,7 @@ router.put('/:id/submit-payment', protect, upload.single('receipt'), async (req,
     res.json({ success: true, data: invoice });
   } catch (err) { next(err); }
 });
+*/
 
 // PUT /api/invoices/:id/approve-payment - Admin approves payment
 router.put('/:id/approve-payment', protect, async (req, res, next) => {
@@ -147,7 +151,7 @@ router.put('/:id/reject-payment', protect, async (req, res, next) => {
 
     invoice.paymentStatus = 'rejected';
     invoice.verificationStatus = 'rejected';
-    invoice.receiptImage = ''; // Clear rejected image
+    // invoice.receiptImage = ''; // Clear rejected image
     await invoice.save();
 
     await createNotification('bill_generated', 'Payment Rejected', `Invoice ${invoice.invoiceNumber} payment rejected. Please re-upload.`, { invoiceId: invoice._id }, 'waiter');

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -6,17 +6,12 @@ import Reveal from '../components/Reveal';
 import ImageSlider from '../components/ImageSlider';
 import api from '../api/axios';
 
-const ROOM_TYPES = [
-  { value:'Deluxe Room',    label:'Deluxe Room',    price:2500,  size:'320 sq ft',  cap:2,   highlights:['Garden View','King Bed','AC','WiFi'] },
-  { value:'Premium Suite',  label:'Premium Suite',  price:5500,  size:'650 sq ft',  cap:4,   highlights:['Balcony','Jacuzzi','Mini Bar','Butler'] },
-  { value:'Family Room',    label:'Family Room',    price:3800,  size:'480 sq ft',  cap:6,   highlights:['Sleeps 6','Extra Beds','Lounge','Resort View'] },
-  { value:'Banquet Hall',   label:'Banquet Hall',   price:25000, size:'3500 sq ft', cap:200, highlights:['200+ Capacity','AV System','Catering','Decor'] },
-];
-
 const STEPS = ['Select Room', 'Personal Details', 'Confirm Booking'];
 
 export default function ReserveRoom() {
   const [step, setStep] = useState(0);
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [checkIn, setCheckIn] = useState(new Date().toISOString().split('T')[0]);
   const [checkOut, setCheckOut] = useState(() => {
@@ -30,6 +25,20 @@ export default function ReserveRoom() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const res = await api.get('/rooms/manage/public');
+        setRooms(res.data.data);
+      } catch (err) {
+        console.error('Failed to fetch rooms', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRooms();
+  }, []);
 
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
@@ -65,12 +74,13 @@ export default function ReserveRoom() {
   const handleSubmit = async () => {
     setSubmitting(true); setError('');
     try {
-      await api.post('/reservations/room', { ...form, checkIn, checkOut, roomType: selected.value, guests: Number(guests) });
+      await api.post('/reservations/room', { ...form, checkIn, checkOut, roomType: selected.name, guests: Number(guests) });
       setDone(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Booking failed. Please try again.');
     } finally { setSubmitting(false); }
   };
+
 
   if (done) return (
     <>
@@ -177,43 +187,48 @@ export default function ReserveRoom() {
                 {/* Room options */}
                 <div className="bg-white p-6 border border-cream-200">
                   <h3 className="font-serif text-lg text-charcoal-900 mb-4">Explore Our Rooms</h3>
-                  <ImageSlider images={['/rooms/deluxe-room.jpg', '/rooms/premium-suite.jpg', '/rooms/family-room.jpg']} />
-                  <div className="mt-6 space-y-3">
-                    {errors.room && <p className="font-sans text-xs text-red-500 mb-3">{errors.room}</p>}
-                    {ROOM_TYPES.map(room => (
-                      <div key={room.value} onClick={() => setSelected(room)}
-                        className={`bg-white border-2 p-5 cursor-pointer transition-all duration-300 hover:border-gold-300 ${
-                          selected?.value === room.value ? 'border-gold-400 shadow-gold' : 'border-cream-200'
-                        }`}>
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-4 flex-1">
-                            <div className={`w-5 h-5 border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
-                              selected?.value === room.value ? 'bg-gold-gradient border-transparent' : 'border-cream-300'
+                  {loading ? (
+                    <div className="text-center py-4">Loading rooms...</div>
+                  ) : (
+                    <>
+                      <div className="mt-6 space-y-3">
+                        {errors.room && <p className="font-sans text-xs text-red-500 mb-3">{errors.room}</p>}
+                        {rooms.map(room => (
+                          <div key={room._id} onClick={() => setSelected(room)}
+                            className={`bg-white border-2 p-5 cursor-pointer transition-all duration-300 hover:border-gold-300 ${
+                              selected?._id === room._id ? 'border-gold-400 shadow-gold' : 'border-cream-200'
                             }`}>
-                              {selected?.value === room.value && (
-                                <svg className="w-3 h-3 text-charcoal-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-serif text-lg text-charcoal-900">{room.label}</p>
-                              <p className="font-sans text-xs text-charcoal-400 mt-0.5">{room.size} · Up to {room.cap} guests</p>
-                              <div className="flex flex-wrap gap-1.5 mt-2">
-                                {room.highlights.map(h => (
-                                  <span key={h} className="font-sans text-[9px] text-gold-600 border border-gold-300/50 px-2 py-0.5">{h}</span>
-                                ))}
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-start gap-4 flex-1">
+                                <div className={`w-5 h-5 border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+                                  selected?._id === room._id ? 'bg-gold-gradient border-transparent' : 'border-cream-300'
+                                }`}>
+                                  {selected?._id === room._id && (
+                                    <svg className="w-3 h-3 text-charcoal-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="font-serif text-lg text-charcoal-900">{room.name}</p>
+                                  <p className="font-sans text-xs text-charcoal-400 mt-0.5">{room.size} · Up to {room.capacity} guests</p>
+                                  <div className="flex flex-wrap gap-1.5 mt-2">
+                                    {room.amenities.map(h => (
+                                      <span key={h} className="font-sans text-[9px] text-gold-600 border border-gold-300/50 px-2 py-0.5">{h}</span>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <p className="font-serif text-2xl text-charcoal-900">₹{room.price.toLocaleString('en-IN')}</p>
+                                <p className="font-sans text-[10px] text-charcoal-400">/ night</p>
                               </div>
                             </div>
                           </div>
-                          <div className="text-right flex-shrink-0">
-                            <p className="font-serif text-2xl text-charcoal-900">₹{room.price.toLocaleString('en-IN')}</p>
-                            <p className="font-sans text-[10px] text-charcoal-400">/ night</p>
-                          </div>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </>
+                  )}
                 </div>
 
                 <button onClick={() => { const e = validateStep1(); if (Object.keys(e).length) { setErrors(e); return; } setStep(1); setErrors({}); }}
@@ -272,7 +287,7 @@ export default function ReserveRoom() {
                   <h3 className="font-serif text-xl text-charcoal-900 mb-7">Confirm Your Booking</h3>
                   <div className="space-y-3 mb-7">
                     {[
-                      ['Room Type', selected?.label],
+                      ['Room Type', selected?.name],
                       ['Check In', checkIn],
                       ['Check Out', checkOut],
                       ['Duration', `${nights} night${nights > 1 ? 's' : ''}`],
@@ -309,14 +324,14 @@ export default function ReserveRoom() {
                 <div className="space-y-2.5">
                   <div className="bg-gold-gradient -mx-6 -mt-5 mb-5 overflow-hidden">
                     <img 
-                        src={`/rooms/${selected.label.toLowerCase().replace(' ', '-')}.jpg`} 
-                        alt={selected.label} 
+                        src={selected.images[0] || '/placeholder-room.jpg'} 
+                        alt={selected.name} 
                         className="w-full h-40 object-cover"
                         onError={(e) => e.target.src = '/placeholder-room.jpg'}
                     />
                     <div className="px-6 py-4">
-                        <p className="font-serif text-xl text-charcoal-900">{selected.label}</p>
-                        <p className="font-sans text-xs text-charcoal-700 mt-0.5">{selected.size} · {selected.cap} guests</p>
+                        <p className="font-serif text-xl text-charcoal-900">{selected.name}</p>
+                        <p className="font-sans text-xs text-charcoal-700 mt-0.5">{selected.size} · {selected.capacity} guests</p>
                     </div>
                   </div>
                   {[

@@ -30,6 +30,8 @@ export default function AdminRooms() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
+  const [image, setImage] = useState(null);
+
   const fetchRooms = async () => {
     setLoading(true);
     try { const res = await api.get('/rooms/manage'); setRooms(res.data.data); setOffline(false); }
@@ -39,28 +41,41 @@ export default function AdminRooms() {
 
   useEffect(() => { fetchRooms(); }, []);
 
-  const openCreate = () => { setForm(EMPTY); setEditing(null); setShowForm(true); };
+  const openCreate = () => { setForm(EMPTY); setEditing(null); setShowForm(true); setImage(null); };
   const openEdit = room => {
     setForm({ ...room, amenities: room.amenities?.join(', ') || '', price: room.price.toString() });
-    setEditing(room._id); setShowForm(true); window.scrollTo({ top:0, behavior:'smooth' });
+    setEditing(room._id); setShowForm(true); setImage(null); window.scrollTo({ top:0, behavior:'smooth' });
   };
 
   const handleSubmit = async ev => {
     ev.preventDefault();
     setSaving(true); setError(''); setSuccess('');
     try {
-      const payload = { ...form, price: Number(form.price), capacity: Number(form.capacity), amenities: form.amenities.split(',').map(a => a.trim()).filter(Boolean) };
+      const formData = new FormData();
+      // Ensure all required fields are explicitly appended
+      formData.append('name', form.name);
+      formData.append('type', form.type);
+      formData.append('price', form.price);
+      formData.append('capacity', form.capacity);
+      formData.append('size', form.size);
+      formData.append('roomNumber', form.roomNumber);
+      formData.append('description', form.description);
+      formData.append('isAvailable', form.isAvailable);
+
+      const finalAmenities = [...form.amenities, ...form.otherAmenities.split(',').map(a => a.trim()).filter(Boolean)];
+      formData.append('amenities', finalAmenities.join(','));
+      
+      if (image) formData.append('image', image);
+      
       if (offline) {
-        if (editing) setRooms(p => p.map(r => r._id === editing ? {...r, ...payload} : r));
-        else setRooms(p => [{ _id: Date.now().toString(), ...payload, images:[] }, ...p]);
         setSuccess(`Room ${editing ? 'updated' : 'created'} (demo mode).`);
       } else {
-        if (editing) await api.put(`/rooms/manage/${editing}`, payload);
-        else await api.post('/rooms/manage', payload);
+        if (editing) await api.put(`/rooms/manage/${editing}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        else await api.post('/rooms/manage', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
         setSuccess(`Room ${editing ? 'updated' : 'created'}.`);
         fetchRooms();
       }
-      setShowForm(false); setEditing(null);
+      setShowForm(false); setEditing(null); setImage(null);
     } catch (err) { setError(err.response?.data?.message || 'Operation failed.'); }
     finally { setSaving(false); }
   };
@@ -116,6 +131,10 @@ export default function AdminRooms() {
               <div><label className="label-luxury">Amenities (comma separated)</label><input className="input-luxury" value={form.amenities} onChange={e => setForm(p => ({...p, amenities: e.target.value}))} placeholder="AC, WiFi, TV, Hot Water" /></div>
             </div>
             <div><label className="label-luxury">Description</label><textarea rows={2} className="input-luxury resize-none" value={form.description} onChange={e => setForm(p => ({...p, description: e.target.value}))} /></div>
+            <div>
+              <label className="label-luxury">Room Image</label>
+              <input type="file" className="input-luxury" accept="image/*" onChange={e => setImage(e.target.files[0])} />
+            </div>
             <label className="flex items-center gap-2 cursor-pointer font-sans text-sm text-charcoal-600">
               <input type="checkbox" checked={form.isAvailable} onChange={e => setForm(p => ({...p, isAvailable: e.target.checked}))} className="accent-gold-400 w-4 h-4" />
               Available for Booking
@@ -133,12 +152,18 @@ export default function AdminRooms() {
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {rooms.map(room => (
             <div key={room._id} className="bg-white border border-cream-200 hover:border-gold-300 hover:shadow-luxury transition-all duration-300 overflow-hidden">
-              {/* Image placeholder */}
+              {/* Image */}
               <div className="h-40 bg-charcoal-900 relative overflow-hidden flex items-center justify-center">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(201,162,39,0.12),transparent_60%)]" />
-                <svg width="40" height="40" viewBox="0 0 100 100" style={{fill:'rgba(201,162,39,0.2)'}} className="relative z-10">
-                  <path d="M50 10 C 55 25, 65 30, 75 28 C 65 35, 60 45, 50 55 C 40 45, 35 35, 25 28 C 35 30, 45 25, 50 10 Z" />
-                </svg>
+                {room.images && room.images.length > 0 ? (
+                  <img src={room.images[0]} alt={room.name} className="w-full h-full object-cover" />
+                ) : (
+                  <>
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(201,162,39,0.12),transparent_60%)]" />
+                    <svg width="40" height="40" viewBox="0 0 100 100" style={{fill:'rgba(201,162,39,0.2)'}} className="relative z-10">
+                      <path d="M50 10 C 55 25, 65 30, 75 28 C 65 35, 60 45, 50 55 C 40 45, 35 35, 25 28 C 35 30, 45 25, 50 10 Z" />
+                    </svg>
+                  </>
+                )}
                 <div className="absolute top-3 right-3 flex gap-1.5">
                   <span className={`font-sans text-[9px] tracking-[0.08em] uppercase px-2 py-0.5 ${TYPE_STYLE[room.type]||''}`}>{room.type}</span>
                 </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
 const NotificationBell = () => {
@@ -6,18 +7,25 @@ const NotificationBell = () => {
   const [count, setCount] = useState(0);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const navigate = useNavigate();
+  const audioRef = useRef(new Audio('/bell.mp3'));
 
   const fetchNotifs = async () => {
     try {
       const res = await api.get('/notifications');
-      setNotifs(res.data.data || []);
+      const newNotifs = res.data.data || [];
+      // Only play sound if new notifications arrived and they are actually new
+      if (newNotifs.length > notifs.length) {
+        audioRef.current.play().catch(e => console.log('Autoplay blocked'));
+      }
+      setNotifs(newNotifs);
       setCount(res.data.count || 0);
     } catch {}
   };
 
   useEffect(() => {
     fetchNotifs();
-    const iv = setInterval(fetchNotifs, 20000);
+    const iv = setInterval(fetchNotifs, 10000); // Poll every 10s
     return () => clearInterval(iv);
   }, []);
 
@@ -33,6 +41,18 @@ const NotificationBell = () => {
       setNotifs([]);
       setCount(0);
     } catch {}
+  };
+
+  const markRead = async (id) => {
+    try { await api.put(`/notifications/${id}/read`); fetchNotifs(); } catch {}
+  };
+
+  const handleNotifClick = (n) => {
+    markRead(n._id);
+    setOpen(false);
+    if (n.type === 'new_kot') navigate('/admin/kitchen');
+    else if (n.type === 'new_order' || n.type === 'new_booking') navigate('/admin/dashboard');
+    else if (n.type === 'bill_generated') navigate('/admin/billing');
   };
 
   const typeIcon = { new_order:'🪑', kot_ready:'🍳', new_booking:'🏨', new_feedback:'⭐', bill_generated:'🧾', new_kot:'🔔' };
@@ -62,7 +82,7 @@ const NotificationBell = () => {
             {notifs.length === 0 ? (
               <p className="text-center text-charcoal-400 text-sm py-8">No new notifications</p>
             ) : notifs.map((n) => (
-              <div key={n._id} className="px-4 py-3 border-b border-cream-200 hover:bg-cream-100 transition-colors">
+              <div key={n._id} onClick={() => handleNotifClick(n)} className="cursor-pointer px-4 py-3 border-b border-cream-200 hover:bg-cream-100 transition-colors">
                 <div className="flex items-start gap-2">
                   <span className="text-base flex-shrink-0">{typeIcon[n.type] || '🔔'}</span>
                   <div className="min-w-0">

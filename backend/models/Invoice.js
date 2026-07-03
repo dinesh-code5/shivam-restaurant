@@ -41,7 +41,7 @@ const invoiceSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending',
   },
-  receiptImage: { type: String, default: '' },
+  // receiptImage: { type: String, default: '' },
   paidAt: { type: Date },
   transactionId: { type: String, default: '' },
   verifiedAt: { type: Date, default: null },

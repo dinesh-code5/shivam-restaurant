@@ -9,13 +9,6 @@ import Reveal from '../components/Reveal';
 import SectionHeading from '../components/SectionHeading';
 import HeroSlider from '../components/HeroSlider'
 
-const ROOMS = [
-  { name: 'Deluxe Room', sub: 'Garden View', price: 2500, cap: 2, size: '320 sq ft', amenities: ['AC', 'WiFi', 'Smart TV', 'Hot Water'], badge: 'Most Popular' },
-  { name: 'Premium Suite', sub: 'Courtyard View', price: 5500, cap: 4, size: '650 sq ft', amenities: ['AC', 'WiFi', 'Mini Bar', 'Jacuzzi', 'Balcony'], badge: 'Best Value' },
-  { name: 'Family Room', sub: 'Resort View', price: 3800, cap: 6, size: '480 sq ft', amenities: ['AC', 'WiFi', 'TV', 'Extra Beds', 'Lounge'], badge: '' },
-  { name: 'Banquet Hall', sub: 'Event Venue', price: 25000, cap: 200, size: '3500 sq ft', amenities: ['AC', 'Stage', 'AV System', 'Catering'], badge: 'Grand Events' },
-];
-
 const OFFERS = [
   { icon: '🎂', sub: 'Celebrate in Style', title: 'Birthday Special', desc: 'Enjoy 10% off your entire bill on your birthday. Complimentary dessert platter included.' },
   { icon: '🌅', sub: 'Stay & Dine Package', title: 'Weekend Getaway', desc: 'Room + dinner for 2, complimentary breakfast and late checkout on weekends.', featured: true },
@@ -43,6 +36,7 @@ function Stars({ n }) {
 export default function Home() {
   const [reviews, setReviews] = useState(MOCK_REVIEWS);
   const [featuredMenu, setFeaturedMenu] = useState([]);
+  const [rooms, setRooms] = useState([]);
 
   useEffect(() => {
     api.get('/menu').then(res => {
@@ -51,6 +45,9 @@ export default function Home() {
     }).catch(() => {});
     api.get('/feedback/public/approved').then(res => {
       if (res.data.data?.length) setReviews(res.data.data.slice(0, 3));
+    }).catch(() => {});
+    api.get('/rooms/manage/public').then(res => {
+      setRooms(res.data.data || []);
     }).catch(() => {});
   }, []);
 
@@ -163,34 +160,32 @@ export default function Home() {
           <SectionHeading eyebrow="Accommodations" title="Our Rooms & Spaces"
             subtitle="From intimate retreats to grand celebration venues — every space crafted with care." />
           <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5">
-            {ROOMS.map((room, i) => (
-              <Reveal key={room.name} delay={i * 0.1}>
+            {rooms.map((room, i) => (
+              <Reveal key={room._id} delay={i * 0.1}>
                 <div className="card-luxury bg-white group">
                   <div className="relative h-52 overflow-hidden bg-charcoal-900">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(201,162,39,0.12),transparent_60%)]" />
-                    {room.badge && (
-                      <div className="absolute top-3 left-0 z-10 bg-gold-gradient text-charcoal-900 font-sans font-medium text-[9px] tracking-[0.15em] uppercase px-4 py-1.5">
-                        {room.badge}
-                      </div>
+                    {room.images && room.images.length > 0 && (
+                        <img src={room.images[0]} alt={room.name} className="w-full h-full object-cover" />
                     )}
                     <div className="absolute bottom-0 left-0 right-0 p-4" style={{background:'linear-gradient(to top,rgba(17,17,17,0.9),transparent)'}}>
                       <p className="font-serif text-xl text-white font-light">{room.name}</p>
-                      <p className="font-sans text-[10px] text-gold-300 tracking-wide">{room.sub}</p>
+                      <p className="font-sans text-[10px] text-gold-300 tracking-wide">{room.type}</p>
                     </div>
                   </div>
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3 text-[10px] text-charcoal-400 font-sans">
                         <span>📐 {room.size}</span>
-                        <span>👥 {room.cap}</span>
+                        <span>👥 {room.capacity}</span>
                       </div>
                       <div className="text-right">
-                        <p className="font-serif text-2xl text-charcoal-900 font-light">₹{room.price.toLocaleString('en-IN')}</p>
+                        <p className="font-serif text-2xl text-charcoal-900 font-light">₹{room.price?.toLocaleString('en-IN')}</p>
                         <p className="font-sans text-[9px] text-charcoal-400">/night</p>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1.5 mb-4">
-                      {room.amenities.map(a => (
+                      {room.amenities?.map(a => (
                         <span key={a} className="font-sans text-[9px] text-charcoal-500 bg-cream-100 px-2 py-1">{a}</span>
                       ))}
                     </div>
