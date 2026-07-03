@@ -9,7 +9,7 @@ const TIME_SLOTS = ['12:00 PM','12:30 PM','01:00 PM','01:30 PM','02:00 PM','07:0
 const OCCASIONS  = ['','Birthday','Anniversary','Business Meeting','Family Gathering','Engagement','Other'];
 
 export default function ReserveTable() {
-  const [form, setForm] = useState({ name:'', phone:'', email:'', date:'', time:'', guests:'2', occasion:'', specialRequest:'' });
+  const [form, setForm] = useState({ name:'', phone:'', email:'', date: new Date().toISOString().split('T')[0], time:'', guests:'2', occasion:'', specialRequest:'' });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);

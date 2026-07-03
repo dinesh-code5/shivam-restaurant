@@ -99,31 +99,27 @@ const AdminBilling = () => {
             <thead>
               <tr className="bg-gold-gradient text-charcoal-900 text-xs font-semibold uppercase tracking-wide">
                 <th className="text-left px-4 py-3">Customer / Table</th>
-                <th className="text-left px-4 py-3">Receipt</th>
                 <th className="text-left px-4 py-3">Status</th>
+                <th className="text-left px-4 py-3">Payment Method</th>
                 <th className="text-right px-4 py-3">Total</th>
                 <th className="text-right px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-cream-200">
-              {invoices.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-12 text-charcoal-400">No invoices found.</td></tr>
-              ) : invoices.map((inv) => (
+            {invoices.length === 0 ? (
+              <tr><td colSpan={5} className="text-center py-12 text-charcoal-400">No invoices found.</td></tr>
+            ) : invoices.map((inv) => (
                 <tr key={inv._id} className="hover:bg-cream-100">
                   <td className="px-4 py-3">
                     <p className="font-semibold text-charcoal-900">{inv.customerName}</p>
                     <p className="text-xs text-charcoal-500">Table: {inv.tableNumber || 'N/A'}</p>
                   </td>
                   <td className="px-4 py-3">
-                    {inv.receiptImage ? (
-                      <a href={`${import.meta.env.VITE_API_URL}${inv.receiptImage}`} target="_blank" rel="noreferrer" className="text-gold-700 underline text-xs">View Receipt</a>
-                    ) : '—'}
-                  </td>
-                  <td className="px-4 py-3">
                     <span className={`font-bold uppercase text-[10px] px-2 py-1 rounded ${inv.paymentStatus === 'pending' ? 'bg-amber-500 text-white' : inv.paymentStatus === 'rejected' ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}>
                       {inv.paymentStatus}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-charcoal-700 capitalize">{inv.paymentMethod || '—'}</td>
                   <td className="px-4 py-3 text-right font-bold text-charcoal-900">
                     ₹{inv.total?.toFixed(2)}
                   </td>

@@ -309,13 +309,13 @@ export default function WaiterPanel() {
         )}
 
         {step === 'order' && (
-          <section className="grid xl:grid-cols-[1fr_390px] gap-5">
+          <section className="grid lg:grid-cols-[1fr_350px] gap-5">
             <div className="space-y-5">
               <div className="bg-white border border-gold-200 rounded-lg p-4 sm:p-5 shadow-sm">
                 <div className="grid md:grid-cols-[1fr_auto] gap-4 items-end">
                   <div>
                     <label className="label-field">Live Search</label>
-                    <input className="input-field text-lg" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search paneer, naan, thali, price..." autoFocus />
+                    <input className="input-field text-lg" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..." autoFocus />
                   </div>
                   <div className="flex gap-2 overflow-x-auto scrollbar-hide">
                     {categories.map((c) => (
@@ -328,7 +328,7 @@ export default function WaiterPanel() {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-2 gap-4">
                 {filteredMenu.map((item) => {
                   const inCart = cart.find((c) => c.menuItemId === item._id);
                   return (
@@ -362,36 +362,12 @@ export default function WaiterPanel() {
               {filteredMenu.length === 0 && (
                 <div className="bg-white border border-cream-200 rounded-lg p-10 text-center">
                   <p className="font-display text-2xl font-bold text-charcoal-700">No matching items</p>
-                  <p className="text-charcoal-500 font-semibold mt-1">Try a different search or category.</p>
-                </div>
-              )}
-
-              {session?.orders?.length > 0 && (
-                <div className="bg-white border border-cream-200 rounded-lg overflow-hidden">
-                  <div className="px-4 py-3 bg-charcoal-950 text-gold-300 flex items-center justify-between">
-                    <h2 className="font-display text-xl font-bold">Running Order</h2>
-                    <p className="font-bold">Total Rs.{existingTotal.toFixed(2)}</p>
-                  </div>
-                  <div className="divide-y divide-cream-100">
-                    {session.orders.map((o, i) => (
-                      <div key={o._id || i} className="grid grid-cols-[1fr_auto] gap-3 p-4">
-                        <div>
-                          <p className="font-bold">{o.name}</p>
-                          <p className="text-sm text-charcoal-500">Qty {o.quantity} x Rs.{o.price}</p>
-                          {o.notes && <p className="text-sm italic text-charcoal-500">{o.notes}</p>}
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold">Rs.{(o.price * o.quantity).toFixed(2)}</p>
-                          <span className={`inline-flex mt-1 rounded border px-2 py-0.5 text-[11px] font-bold capitalize ${orderStatus[o.status] || orderStatus.pending}`}>{o.status}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>
 
-            <aside className="xl:sticky xl:top-24 h-max bg-charcoal-950 text-cream-50 rounded-lg shadow-luxury overflow-hidden">
+            <aside className="lg:sticky lg:top-24 h-max bg-charcoal-950 text-cream-50 rounded-lg shadow-luxury overflow-hidden">
+
               <div className="p-5 border-b border-gold-400/20">
                 <p className="eyebrow text-gold-400 mb-2">Cart</p>
                 <h2 className="font-display text-3xl font-bold">Table {selectedTable?.number}</h2>

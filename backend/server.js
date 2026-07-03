@@ -34,7 +34,11 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+      origin: ['https://shivam-resort-restaurant.netlify.app', 'http://localhost:3000'],
+      credentials: true
+    }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static('uploads'));
@@ -62,8 +66,34 @@ app.use('/api/analytics', analyticsRoutes);
 
 // ── CRON JOBS ─────────────────────────────────────────────────────────────
 
-// Daily 9 AM — Birthday & Retention automation
-cron.schedule('0 9 * * *', async () => {
+import TableReservation from './models/TableReservation.js';
+import RoomReservation from './models/RoomReservation.js';
+
+// ... (existing cron code)
+
+// Daily 1 AM — Expire past reservations
+cron.schedule('0 1 * * *', async () => {
+  console.log('[CRON] Running reservation expiration...');
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Mark old table reservations
+    await TableReservation.updateMany(
+      { date: { $lt: today }, status: { $in: ['Pending', 'Confirmed'] } },
+      { $set: { status: 'Completed' } }
+    );
+    
+    // Mark old room reservations
+    await RoomReservation.updateMany(
+      { checkIn: { $lt: today }, status: { $in: ['Pending', 'Confirmed'] } },
+      { $set: { status: 'Completed' } }
+    );
+    
+    console.log('[CRON] Reservation expiration complete.');
+  } catch (err) {
+    console.error('[CRON] Expiration error:', err.message);
+  }
+});
   console.log('[CRON] Running daily WhatsApp automation...');
   try {
     const today = new Date();
