@@ -8,13 +8,11 @@ import { protect } from '../middleware/auth.js';
 const router = express.Router();
 console.log('DEBUG: roomManageRoutes.js is being loaded!');
 // Cloudinary Configuration
-const configureCloudinary = () => {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-};
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -27,7 +25,12 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 // GET /api/rooms/manage — all rooms with full details (admin)
-
+router.get('/manage', protect, async (req, res, next) => {
+  try {
+    const rooms = await Room.find().sort({ type: 1 });
+    res.json({ success: true, data: rooms });
+  } catch (err) { next(err); }
+});
 
 // GET /api/rooms/manage/public — public view
 router.get('/manage/public', async (req, res, next) => {
