@@ -133,6 +133,12 @@ export default function Navbar() {
             >
               STAFF LOGIN
             </Link>
+            <Link
+              to="/admin"
+              className="block py-3 border-b border-white/5 font-sans text-[11px] tracking-[0.2em] uppercase text-gold-400 font-semibold hover:text-gold-300 transition-colors"
+            >
+              STAFF DASHBOARD
+            </Link>
             <div className="pt-4">
               <Link
                 to="/reserve-room"

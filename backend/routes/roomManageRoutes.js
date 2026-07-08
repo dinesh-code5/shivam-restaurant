@@ -6,7 +6,7 @@ import Room from '../models/Room.js';
 import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
-
+console.log('DEBUG: roomManageRoutes.js is being loaded!');
 // Cloudinary Configuration
 const configureCloudinary = () => {
   cloudinary.config({
