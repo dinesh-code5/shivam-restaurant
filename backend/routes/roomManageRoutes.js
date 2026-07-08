@@ -27,7 +27,12 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 // GET /api/rooms/manage — all rooms with full details (admin)
-
+router.get('/manage', protect, async (req, res, next) => {
+  try {
+    const rooms = await Room.find().sort({ type: 1 });
+    res.json({ success: true, data: rooms });
+  } catch (err) { next(err); }
+});
 
 // GET /api/rooms/manage/public — public view
 router.get('/manage/public', async (req, res, next) => {
