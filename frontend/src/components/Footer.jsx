@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="bg-charcoal-950/80 text-cream-100 border-t border-gold-500/10 backdrop-blur-md relative z-10">
       <div className="container-lux py-16 md:py-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-16">
 
           {/* Brand & Logo */}
           <div className="flex flex-col items-start">

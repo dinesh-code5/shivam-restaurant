@@ -32,10 +32,10 @@ export default function AdminLayout() {
   return (
     <div className="min-h-screen flex bg-cream-100">
       {/* Mobile overlay */}
-      {open && <div className="fixed inset-0 bg-black/50 z-20 lg:hidden" onClick={() => setOpen(false)} />}
+      {open && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setOpen(false)} />}
 
       {/* Sidebar - Responsive: hidden on small, fixed on mobile open, static on large */}
-      <aside className={`fixed top-0 left-0 h-full w-64 bg-charcoal-900 z-30 flex flex-col transition-transform duration-300 
+      <aside className={`fixed top-0 left-0 h-full w-64 bg-charcoal-900 z-50 flex flex-col transition-transform duration-300 
         ${open ? 'translate-x-0' : '-translate-x-full'} 
         lg:translate-x-0 lg:static lg:z-auto border-r border-gold-400/10 shadow-xl lg:shadow-none`}>
         
