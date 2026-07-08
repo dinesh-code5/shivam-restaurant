@@ -56,10 +56,17 @@ router.get('/manage/public', async (req, res, next) => {
 // PUT /api/rooms/manage/:id
 // POST /api/rooms/manage
 router.post('/manage', protect, upload.any(), async (req, res, next) => {
-  try {
-    console.log('DEBUG: req.files:', req.files);
-    console.log('DEBUG: req.body:', req.body);
+  console.log('DEBUG: --- POST /manage request received ---');
+  console.log('DEBUG: req.body keys:', Object.keys(req.body));
+  console.log('DEBUG: req.files exists:', !!req.files);
+  if (req.files) {
+      console.log('DEBUG: req.files count:', req.files.length);
+      req.files.forEach((f, i) => {
+          console.log(`DEBUG: File ${i}: fieldname=${f.fieldname}, originalname=${f.originalname}, mimetype=${f.mimetype}`);
+      });
+  }
 
+  try {
     const {
       name, type, price, capacity, size, roomNumber,
       description, isAvailable, amenities
