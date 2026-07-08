@@ -103,6 +103,12 @@ router.put('/manage/:id', protect, upload.any(), async (req, res, next) => {
       description, isAvailable, amenities
     } = req.body;
 
+    // Fetch existing room to preserve old image if no new one is uploaded
+    const existingRoom = await Room.findById(req.params.id);
+    if (!existingRoom) {
+      return res.status(404).json({ success: false, message: 'Room not found' });
+    }
+
     const imageFile = req.files?.find(f => f.fieldname === 'image');
 
     const updateData = {
@@ -119,16 +125,15 @@ router.put('/manage/:id', protect, upload.any(), async (req, res, next) => {
 
     if (imageFile) {
       updateData.images = [imageFile.path];
+    } else {
+      // Fallback: keep existing images or use a default placeholder
+      updateData.images = existingRoom.images.length > 0 ? existingRoom.images : ['https://via.placeholder.com/400x200?text=No+Image'];
     }
 
     const room = await Room.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true,
     });
-
-    if (!room) {
-      return res.status(404).json({ success: false, message: 'Room not found' });
-    }
 
     res.json({ success: true, data: room });
   } catch (err) { next(err); }
