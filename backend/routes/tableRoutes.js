@@ -152,6 +152,31 @@ router.post('/:id/session/start', protect, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ── POST /api/tables/:id/clear — clear table status ────────────────────
+router.post('/:id/clear', protect, async (req, res, next) => {
+  try {
+    const table = await Table.findById(req.params.id);
+    if (!table) return res.status(404).json({ success: false, message: 'Table not found' });
+
+    if (table.currentSession) {
+      const session = await TableSession.findById(table.currentSession);
+      if (session) {
+        session.status = 'closed';
+        session.closedAt = new Date();
+        await session.save();
+      }
+    }
+
+    table.status = 'available';
+    table.currentSession = null;
+    await table.save();
+
+    await createNotification('table_cleared', 'Table Cleared', `Table ${table.number} is now available`, { tableNumber: table.number }, 'admin');
+
+    res.json({ success: true, message: `Table ${table.number} cleared`, data: table });
+  } catch (err) { next(err); }
+});
+
 // ── GET /api/tables/:id/session — get active session ─────────────────────
 router.get('/:id/session', async (req, res, next) => {
   try {

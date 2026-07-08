@@ -10,7 +10,7 @@ const roomReservationSchema = new mongoose.Schema(
     roomType: {
       type: String,
       required: true,
-      enum: ['Deluxe Room', 'Premium Suite', 'Family Room', 'Banquet Hall'],
+      enum: ['Deluxe Room', 'Premium Suite', 'Family Room', 'Banquet Hall', 'Maharaja Room'],
     },
     guests: { type: Number, required: true, min: 1, max: 20 },
     specialRequest: { type: String, default: '' },

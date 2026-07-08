@@ -28,7 +28,7 @@ router.post(
         return res.status(400).json({ success: false, message: errors.array()[0].msg, errors: errors.array() });
       }
 
-      if (new Date(req.body.checkOut) <= new Date(req.body.checkIn)) {
+      if (new Date(req.body.checkOut).toDateString() === new Date(req.body.checkIn).toDateString() || new Date(req.body.checkOut) < new Date(req.body.checkIn)) {
         return res.status(400).json({ success: false, message: 'Check-out date must be after check-in date' });
       }
 

@@ -133,6 +133,23 @@ const SessionModal = ({ table, onClose, onRefresh }) => {
                         </div>
                     </div>
                 )}
+                {session.status === 'billed' && (
+                  <div className="border-t pt-8">
+                    <button onClick={async () => {
+                      if (!window.confirm('Clear table?')) return;
+                      try {
+                        await api.post(`/tables/${table._id}/clear`);
+                        alert('Table cleared.');
+                        onRefresh();
+                        onClose();
+                      } catch (err) {
+                        alert(err.response?.data?.message || 'Error clearing table');
+                      }
+                    }} className="w-full py-4 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 transition-all text-lg uppercase tracking-widest">
+                      Clear Table
+                    </button>
+                  </div>
+                )}
             </div>
         )}
       </div>

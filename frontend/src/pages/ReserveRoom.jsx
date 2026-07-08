@@ -1,25 +1,32 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Reveal from '../components/Reveal';
 import ImageSlider from '../components/ImageSlider';
 import api from '../api/axios';
 
+const BG_IMAGE = "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1920&q=80";
 const STEPS = ['Select Room', 'Personal Details', 'Confirm Booking'];
 
 export default function ReserveRoom() {
+  const location = useLocation();
+  const state = location.state || {};
+
   const [step, setStep] = useState(0);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
-  const [checkIn, setCheckIn] = useState(new Date().toISOString().split('T')[0]);
+  
+  // Initialize with states passed from landing page widget if available
+  const [checkIn, setCheckIn] = useState(state.checkIn || new Date().toISOString().split('T')[0]);
   const [checkOut, setCheckOut] = useState(() => {
+    if (state.checkOut) return state.checkOut;
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow.toISOString().split('T')[0];
   });
-  const [guests, setGuests] = useState(1);
+  const [guests, setGuests] = useState(state.guests || 1);
   const [form, setForm] = useState({ name:'', phone:'', email:'', specialRequest:'' });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -81,72 +88,82 @@ export default function ReserveRoom() {
     } finally { setSubmitting(false); }
   };
 
-
   if (done) return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-ivory flex items-center justify-center px-4 pt-24 pb-12">
-        <div className="text-center max-w-md">
-          <div className="w-20 h-20 bg-gold-gradient mx-auto mb-6 flex items-center justify-center">
-            <svg className="w-9 h-9 text-charcoal-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+    <div 
+      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed relative text-white"
+      style={{ backgroundImage: `url(${BG_IMAGE})` }}
+    >
+      <div className="absolute inset-0 bg-black/80 z-0" />
+      <div className="relative z-10">
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center px-4 pt-28 pb-12">
+          <div className="glass-luxury p-8 md:p-12 text-center max-w-lg border border-white/10 shadow-luxury">
+            <div className="w-20 h-20 bg-gold-gradient mx-auto mb-6 flex items-center justify-center">
+              <svg className="w-9 h-9 text-charcoal-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="eyebrow text-gold-400 mb-3">Booking Confirmed</p>
+            <h2 className="font-serif text-4xl text-white font-light mb-3">Thank You, {form.name}</h2>
+            <p className="font-sans text-sm text-white/60 font-light leading-relaxed mb-2">
+              Your reservation for the <strong>{selected?.name}</strong> has been received.
+            </p>
+            <p className="font-sans text-sm text-white/60 mb-8">
+              We'll confirm via WhatsApp to <strong>{form.phone}</strong> within 2 hours.
+            </p>
+            <Link to="/" className="btn-taj-gold py-3.5 px-8 inline-flex">Back to Home</Link>
           </div>
-          <p className="eyebrow text-gold-500 mb-3">Booking Confirmed</p>
-          <h2 className="font-serif text-4xl text-charcoal-900 font-light mb-3">Thank You, {form.name}</h2>
-          <p className="font-sans text-sm text-charcoal-400 font-light leading-relaxed mb-2">
-            Your reservation for the <strong>{selected?.label}</strong> has been received.
-          </p>
-          <p className="font-sans text-sm text-charcoal-400 mb-8">
-            We'll confirm via WhatsApp to <strong>{form.phone}</strong> within 2 hours.
-          </p>
-          <Link to="/" className="btn-primary inline-flex">Back to Home</Link>
         </div>
+        <Footer />
       </div>
-      <Footer />
-    </>
+    </div>
   );
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-cream-100">
+    <div 
+      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed relative text-white"
+      style={{ backgroundImage: `url(${BG_IMAGE})` }}
+    >
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/82 z-0 pointer-events-none" />
+
+      <div className="relative z-10">
+        <Navbar />
 
         {/* Header */}
-        <div className="relative h-[400px] flex items-center justify-center text-center overflow-hidden">
-          <img src="/bg-rooms.jpg" alt="Rooms Background" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-[rgba(0,0,0,0.45)]" />
-          <div className="relative z-10">
+        <div className="relative h-[300px] flex items-center justify-center text-center overflow-hidden">
+          <div className="relative z-10 pt-16">
             <p className="eyebrow text-gold-400 mb-2">Accommodations</p>
             <h1 className="font-serif text-4xl sm:text-5xl font-light text-white">Plan Your Stay</h1>
+            <div className="w-12 h-px bg-gold-400/40 mx-auto mt-4" />
           </div>
         </div>
 
         {/* Step indicator — Taj-style */}
-        <div className="bg-white border-b border-cream-200 py-5 sticky top-16 md:top-20 z-30">
+        <div className=" py-5 sticky top-16 md:top-20 z-30 ">
           <div className="max-w-2xl mx-auto px-6">
             <div className="flex items-center justify-between">
               {STEPS.map((s, i) => (
                 <div key={s} className="flex items-center flex-1">
                   <div className="flex flex-col items-center">
-                    <div className={`w-8 h-8 flex items-center justify-center border-2 transition-all duration-300 ${
+                    <div className={`w-8 h-8 flex items-center justify-center border transition-all duration-300 ${
                       i < step ? 'bg-gold-gradient border-transparent' :
-                      i === step ? 'border-gold-400 bg-white' : 'border-cream-300 bg-white'
+                      i === step ? 'border-gold-400 bg-gold-400/10' : 'border-white/20 bg-white/5'
                     }`}>
                       {i < step ? (
                         <svg className="w-3.5 h-3.5 text-charcoal-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
-                        <span className={`font-sans text-xs font-medium ${i === step ? 'text-gold-500' : 'text-charcoal-300'}`}>{i+1}</span>
+                        <span className={`font-sans text-xs font-semibold ${i === step ? 'text-gold-400' : 'text-white/40'}`}>{i+1}</span>
                       )}
                     </div>
-                    <p className={`font-sans text-[9px] tracking-[0.12em] uppercase mt-1.5 whitespace-nowrap ${
-                      i === step ? 'text-gold-500' : i < step ? 'text-charcoal-500' : 'text-charcoal-300'
+                    <p className={`font-sans text-[9px] tracking-[0.12em] uppercase mt-2 whitespace-nowrap ${
+                      i === step ? 'text-gold-400' : i < step ? 'text-white/80' : 'text-white/40'
                     }`}>{s}</p>
                   </div>
                   {i < STEPS.length - 1 && (
-                    <div className={`flex-1 h-px mx-3 transition-all duration-500 ${i < step ? 'bg-gold-400' : 'bg-cream-200'}`} />
+                    <div className={`flex-1 h-[1.5px] mx-3 transition-all duration-500 ${i < step ? 'bg-gold-400' : 'bg-white/10'}`} />
                   )}
                 </div>
               ))}
@@ -154,85 +171,106 @@ export default function ReserveRoom() {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 grid lg:grid-cols-3 gap-8">
+        {/* Content layout */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 grid lg:grid-cols-3 gap-8 relative">
           <div className="lg:col-span-2 space-y-6">
 
-            {/* STEP 0: Select Room + Dates */}
+            {/* STEP 0: Dates and Rooms */}
             {step === 0 && (
               <Reveal>
-                {/* Dates */}
-                <div className="bg-white border border-cream-200 p-6 mb-5">
-                  <h3 className="font-serif text-lg text-charcoal-900 mb-5">When are you visiting?</h3>
+                {/* Date range picker panel */}
+                <div className="glass-luxury border border-white/10 p-6 mb-5">
+                  <h3 className="font-serif text-lg text-white mb-5 font-light tracking-wide">When are you visiting?</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
                     <div className="col-span-1">
-                      <label className="label-luxury">Check In</label>
-                      <input type="date" min={todayStr} max={oneMonthLaterStr} value={checkIn} onChange={e => setCheckIn(e.target.value)} className="input-luxury" />
-                      {errors.checkIn && <p className="font-sans text-xs text-red-500 mt-1">{errors.checkIn}</p>}
+                      <label className="label-luxury text-gold-400/90 text-[10px]">Check In</label>
+                      <input 
+                        type="date" 
+                        min={todayStr} 
+                        max={oneMonthLaterStr} 
+                        value={checkIn} 
+                        onChange={e => setCheckIn(e.target.value)} 
+                        className="w-full bg-white/5 border border-white/10 text-white px-3 py-2 text-xs focus:outline-none focus:border-gold-400 font-medium" 
+                      />
+                      {errors.checkIn && <p className="font-sans text-xs text-red-400 mt-1">{errors.checkIn}</p>}
                     </div>
                     <div className="col-span-1">
-                      <label className="label-luxury">Check Out</label>
-                      <input type="date" min={minCheckOut} max={maxCheckOut} value={checkOut} onChange={e => setCheckOut(e.target.value)} className="input-luxury" />
-                      {errors.checkOut && <p className="font-sans text-xs text-red-500 mt-1">{errors.checkOut}</p>}
+                      <label className="label-luxury text-gold-400/90 text-[10px]">Check Out</label>
+                      <input 
+                        type="date" 
+                        min={minCheckOut} 
+                        max={maxCheckOut} 
+                        value={checkOut} 
+                        onChange={e => setCheckOut(e.target.value)} 
+                        className="w-full bg-white/5 border border-white/10 text-white px-3 py-2 text-xs focus:outline-none focus:border-gold-400 font-medium" 
+                      />
+                      {errors.checkOut && <p className="font-sans text-xs text-red-400 mt-1">{errors.checkOut}</p>}
                     </div>
                     <div className="col-span-2 sm:col-span-1">
-                      <label className="label-luxury">Guests</label>
-                      <select value={guests} onChange={e => setGuests(e.target.value)} className="input-luxury">
-                        {[1,2,3,4,5,6,8,10,15,20].map(n => <option key={n} value={n}>{n} {n===1?'Guest':'Guests'}</option>)}
+                      <label className="label-luxury text-gold-400/90 text-[10px]">Guests</label>
+                      <select 
+                        value={guests} 
+                        onChange={e => setGuests(Number(e.target.value))} 
+                        className="w-full bg-white/5 border border-white/10 text-white px-3 py-2.5 text-xs focus:outline-none focus:border-gold-400 font-medium"
+                      >
+                        {[1,2,3,4,5,6,8,10,15,20].map(n => <option key={n} value={n} className="bg-charcoal-900 text-white">{n} {n===1?'Guest':'Guests'}</option>)}
                       </select>
                     </div>
                   </div>
                 </div>
 
-                {/* Room options */}
-                <div className="bg-white p-6 border border-cream-200">
-                  <h3 className="font-serif text-lg text-charcoal-900 mb-4">Explore Our Rooms</h3>
+                {/* Rooms selection list panel */}
+                <div className="glass-luxury border border-white/10 p-6">
+                  <h3 className="font-serif text-lg text-white mb-4 font-light tracking-wide">Explore Our Rooms</h3>
                   {loading ? (
-                    <div className="text-center py-4">Loading rooms...</div>
+                    <div className="text-center py-4 text-white/50">Loading rooms...</div>
                   ) : (
-                    <>
-                      <div className="mt-6 space-y-3">
-                        {errors.room && <p className="font-sans text-xs text-red-500 mb-3">{errors.room}</p>}
-                        {rooms.map(room => (
-                          <div key={room._id} onClick={() => setSelected(room)}
-                            className={`bg-white border-2 p-5 cursor-pointer transition-all duration-300 hover:border-gold-300 ${
-                              selected?._id === room._id ? 'border-gold-400 shadow-gold' : 'border-cream-200'
-                            }`}>
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex items-start gap-4 flex-1">
-                                <div className={`w-5 h-5 border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
-                                  selected?._id === room._id ? 'bg-gold-gradient border-transparent' : 'border-cream-300'
-                                }`}>
-                                  {selected?._id === room._id && (
-                                    <svg className="w-3 h-3 text-charcoal-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  )}
-                                </div>
-                                <div>
-                                  <p className="font-serif text-lg text-charcoal-900">{room.name}</p>
-                                  <p className="font-sans text-xs text-charcoal-400 mt-0.5">{room.size} · Up to {room.capacity} guests</p>
-                                  <div className="flex flex-wrap gap-1.5 mt-2">
-                                    {room.amenities.map(h => (
-                                      <span key={h} className="font-sans text-[9px] text-gold-600 border border-gold-300/50 px-2 py-0.5">{h}</span>
-                                    ))}
-                                  </div>
-                                </div>
+                    <div className="space-y-3">
+                      {errors.room && <p className="font-sans text-xs text-red-400 mb-3">{errors.room}</p>}
+                      {rooms.map(room => (
+                        <div 
+                          key={room._id} 
+                          onClick={() => setSelected(room)}
+                          className={`border-2 p-5 cursor-pointer transition-all duration-300 hover:border-gold-400/40 bg-charcoal-950/40 ${
+                            selected?._id === room._id ? 'border-gold-400 shadow-gold bg-gold-400/5' : 'border-white/10'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-4 flex-1">
+                              <div className={`w-5 h-5 border flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+                                selected?._id === room._id ? 'bg-gold-gradient border-transparent' : 'border-white/30'
+                              }`}>
+                                {selected?._id === room._id && (
+                                  <svg className="w-3.5 h-3.5 text-charcoal-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
                               </div>
-                              <div className="text-right flex-shrink-0">
-                                <p className="font-serif text-2xl text-charcoal-900">₹{room.price.toLocaleString('en-IN')}</p>
-                                <p className="font-sans text-[10px] text-charcoal-400">/ night</p>
+                              <div>
+                                <p className="font-serif text-lg text-white">{room.name}</p>
+                                <p className="font-sans text-xs text-white/50 mt-0.5">{room.size} · Up to {room.capacity} guests</p>
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                  {room.amenities.map(h => (
+                                    <span key={h} className="font-sans text-[9px] text-gold-300 border border-gold-400/35 px-2 py-0.5 bg-gold-400/5">{h}</span>
+                                  ))}
+                                </div>
                               </div>
                             </div>
+                            <div className="text-right flex-shrink-0">
+                              <p className="font-serif text-2xl text-gold-400">₹{room.price.toLocaleString('en-IN')}</p>
+                              <p className="font-sans text-[9px] text-white/40">/ night</p>
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
 
-                <button onClick={() => { const e = validateStep1(); if (Object.keys(e).length) { setErrors(e); return; } setStep(1); setErrors({}); }}
-                  className="btn-primary mt-5">
+                <button 
+                  onClick={() => { const e = validateStep1(); if (Object.keys(e).length) { setErrors(e); return; } setStep(1); setErrors({}); }}
+                  className="btn-taj-gold mt-5"
+                >
                   Continue to Personal Details →
                 </button>
               </Reveal>
@@ -241,40 +279,58 @@ export default function ReserveRoom() {
             {/* STEP 1: Personal Details */}
             {step === 1 && (
               <Reveal>
-                <div className="bg-white border border-cream-200 p-6 sm:p-8">
-                  <h3 className="font-serif text-xl text-charcoal-900 mb-7">Your Details</h3>
+                <div className="glass-luxury border border-white/10 p-6 sm:p-8">
+                  <h3 className="font-serif text-xl text-white mb-7 font-light tracking-wide">Your Details</h3>
                   <div className="space-y-6">
                     <div className="grid sm:grid-cols-2 gap-6">
                       <div>
-                        <label className="label-luxury">Full Name *</label>
-                        <input className="input-luxury" placeholder="Your full name" value={form.name}
-                          onChange={e => setForm(p => ({...p, name: e.target.value}))} />
-                        {errors.name && <p className="font-sans text-xs text-red-500 mt-1">{errors.name}</p>}
+                        <label className="label-luxury text-gold-400/90 text-[10px]">Full Name *</label>
+                        <input 
+                          className="w-full bg-white/5 border border-white/10 text-white px-3 py-2 text-xs focus:outline-none focus:border-gold-400 font-medium" 
+                          placeholder="Your full name" 
+                          value={form.name}
+                          onChange={e => setForm(p => ({...p, name: e.target.value}))} 
+                        />
+                        {errors.name && <p className="font-sans text-xs text-red-400 mt-1">{errors.name}</p>}
                       </div>
                       <div>
-                        <label className="label-luxury">Phone Number *</label>
-                        <input type="tel" className="input-luxury" placeholder="+91 XXXXX XXXXX" value={form.phone}
-                          onChange={e => setForm(p => ({...p, phone: e.target.value}))} />
-                        {errors.phone && <p className="font-sans text-xs text-red-500 mt-1">{errors.phone}</p>}
+                        <label className="label-luxury text-gold-400/90 text-[10px]">Phone Number *</label>
+                        <input 
+                          type="tel" 
+                          className="w-full bg-white/5 border border-white/10 text-white px-3 py-2 text-xs focus:outline-none focus:border-gold-400 font-medium" 
+                          placeholder="+91 XXXXX XXXXX" 
+                          value={form.phone}
+                          onChange={e => setForm(p => ({...p, phone: e.target.value}))} 
+                        />
+                        {errors.phone && <p className="font-sans text-xs text-red-400 mt-1">{errors.phone}</p>}
                       </div>
                     </div>
                     <div>
-                      <label className="label-luxury">Email Address</label>
-                      <input type="email" className="input-luxury" placeholder="you@example.com" value={form.email}
-                        onChange={e => setForm(p => ({...p, email: e.target.value}))} />
-                      {errors.email && <p className="font-sans text-xs text-red-500 mt-1">{errors.email}</p>}
+                      <label className="label-luxury text-gold-400/90 text-[10px]">Email Address</label>
+                      <input 
+                        type="email" 
+                        className="w-full bg-white/5 border border-white/10 text-white px-3 py-2 text-xs focus:outline-none focus:border-gold-400 font-medium" 
+                        placeholder="you@example.com" 
+                        value={form.email}
+                        onChange={e => setForm(p => ({...p, email: e.target.value}))} 
+                      />
+                      {errors.email && <p className="font-sans text-xs text-red-400 mt-1">{errors.email}</p>}
                     </div>
                     <div>
-                      <label className="label-luxury">Special Requests</label>
-                      <textarea rows={3} className="input-luxury resize-none"
+                      <label className="label-luxury text-gold-400/90 text-[10px]">Special Requests</label>
+                      <textarea 
+                        rows={3} 
+                        className="w-full bg-white/5 border border-white/10 text-white px-3 py-2.5 text-xs focus:outline-none focus:border-gold-400 font-medium resize-none"
                         placeholder="Dietary requirements, accessibility needs, special arrangements..."
-                        value={form.specialRequest} onChange={e => setForm(p => ({...p, specialRequest: e.target.value}))} />
+                        value={form.specialRequest} 
+                        onChange={e => setForm(p => ({...p, specialRequest: e.target.value}))} 
+                      />
                     </div>
                   </div>
                   <div className="flex gap-4 mt-7">
-                    <button onClick={() => setStep(0)} className="btn-outline dark">← Back</button>
+                    <button onClick={() => setStep(0)} className="inline-flex items-center justify-center border border-white/20 text-white font-sans font-medium text-[10px] tracking-[0.2em] uppercase px-6 py-3 hover:border-white transition-all">← Back</button>
                     <button onClick={() => { const e = validateStep2(); if (Object.keys(e).length) { setErrors(e); return; } setStep(2); setErrors({}); }}
-                      className="btn-primary">Review Booking →</button>
+                      className="btn-taj-gold">Review Booking →</button>
                   </div>
                 </div>
               </Reveal>
@@ -283,9 +339,9 @@ export default function ReserveRoom() {
             {/* STEP 2: Confirm */}
             {step === 2 && (
               <Reveal>
-                <div className="bg-white border border-cream-200 p-6 sm:p-8">
-                  <h3 className="font-serif text-xl text-charcoal-900 mb-7">Confirm Your Booking</h3>
-                  <div className="space-y-3 mb-7">
+                <div className="glass-luxury border border-white/10 p-6 sm:p-8">
+                  <h3 className="font-serif text-xl text-white mb-7 font-light tracking-wide">Confirm Your Booking</h3>
+                  <div className="space-y-1 mb-7">
                     {[
                       ['Room Type', selected?.name],
                       ['Check In', checkIn],
@@ -296,16 +352,16 @@ export default function ReserveRoom() {
                       ['Phone', form.phone],
                       ['Email', form.email || '—'],
                     ].map(([k, v]) => (
-                      <div key={k} className="flex items-center justify-between py-3 border-b border-cream-100 last:border-0">
-                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-charcoal-400">{k}</p>
-                        <p className="font-sans text-sm text-charcoal-800 font-medium">{v}</p>
+                      <div key={k} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
+                        <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-white/50">{k}</p>
+                        <p className="font-sans text-sm text-white font-medium">{v}</p>
                       </div>
                     ))}
                   </div>
-                  {error && <p className="font-sans text-sm text-red-500 mb-4">{error}</p>}
+                  {error && <p className="font-sans text-sm text-red-400 mb-4">{error}</p>}
                   <div className="flex gap-4">
-                    <button onClick={() => setStep(1)} className="btn-outline dark">← Back</button>
-                    <button onClick={handleSubmit} disabled={submitting} className="btn-primary disabled:opacity-60">
+                    <button onClick={() => setStep(1)} className="inline-flex items-center justify-center border border-white/20 text-white font-sans font-medium text-[10px] tracking-[0.2em] uppercase px-6 py-3 hover:border-white transition-all">← Back</button>
+                    <button onClick={handleSubmit} disabled={submitting} className="btn-taj-gold disabled:opacity-60">
                       {submitting ? 'Confirming...' : 'Confirm Booking'}
                     </button>
                   </div>
@@ -316,22 +372,22 @@ export default function ReserveRoom() {
 
           {/* Sidebar — Your Stay */}
           <div className="lg:col-span-1">
-            <div className="bg-white border border-cream-200 p-6 sticky top-40">
-              <h3 className="font-serif text-lg text-charcoal-900 mb-5 pb-4 border-b border-cream-100">Your Stay</h3>
+            <div className="glass-luxury border border-white/10 p-6 sticky top-40">
+              <h3 className="font-serif text-lg text-white mb-5 pb-4 border-b border-white/5 font-light tracking-wide">Your Stay</h3>
               {!selected ? (
-                <p className="font-sans text-sm text-charcoal-400 font-light">Select a room to see your booking summary.</p>
+                <p className="font-sans text-sm text-white/40 font-light leading-relaxed">Select a room to see your booking summary.</p>
               ) : (
-                <div className="space-y-2.5">
-                  <div className="bg-gold-gradient -mx-6 -mt-5 mb-5 overflow-hidden">
+                <div className="space-y-3">
+                  <div className="bg-charcoal-950 -mx-6 -mt-5 mb-5 overflow-hidden">
                     <img 
-                        src={selected.images[0] || '/placeholder-room.jpg'} 
-                        alt={selected.name} 
-                        className="w-full h-40 object-cover"
-                        onError={(e) => e.target.src = '/placeholder-room.jpg'}
+                      src={selected.images[0] || '/placeholder-room.jpg'} 
+                      alt={selected.name} 
+                      className="w-full h-40 object-cover"
+                      onError={(e) => e.target.src = '/placeholder-room.jpg'}
                     />
-                    <div className="px-6 py-4">
-                        <p className="font-serif text-xl text-charcoal-900">{selected.name}</p>
-                        <p className="font-sans text-xs text-charcoal-700 mt-0.5">{selected.size} · {selected.capacity} guests</p>
+                    <div className="px-6 py-4 bg-charcoal-900/90 border-b border-white/5">
+                      <p className="font-serif text-xl text-white font-light">{selected.name}</p>
+                      <p className="font-sans text-xs text-white/50 mt-0.5">{selected.size} · {selected.capacity} guests</p>
                     </div>
                   </div>
                   {[
@@ -340,26 +396,26 @@ export default function ReserveRoom() {
                     ['Duration', `${nights} night${nights > 1 ? 's' : ''}`],
                     ['Guests', guests],
                   ].map(([k,v]) => (
-                    <div key={k} className="flex justify-between text-xs">
-                      <span className="font-sans text-charcoal-400">{k}</span>
-                      <span className="font-sans text-charcoal-700 font-medium">{v}</span>
+                    <div key={k} className="flex justify-between text-xs py-1 border-b border-white/5 last:border-b-0">
+                      <span className="font-sans text-white/50">{k}</span>
+                      <span className="font-sans text-white font-medium">{v}</span>
                     </div>
                   ))}
-                  <div className="border-t border-cream-100 pt-3 mt-3 space-y-2">
+                  <div className="pt-3 mt-3 space-y-2">
                     <div className="flex justify-between text-xs">
-                      <span className="font-sans text-charcoal-400">Room Rate ({nights}n)</span>
-                      <span className="font-sans text-charcoal-700">₹{subtotal.toLocaleString('en-IN')}</span>
+                      <span className="font-sans text-white/50">Room Rate ({nights}n)</span>
+                      <span className="font-sans text-white">₹{subtotal.toLocaleString('en-IN')}</span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="font-sans text-charcoal-400">GST (12%)</span>
-                      <span className="font-sans text-charcoal-700">₹{gst.toLocaleString('en-IN')}</span>
+                      <span className="font-sans text-white/50">GST (12%)</span>
+                      <span className="font-sans text-white">₹{gst.toLocaleString('en-IN')}</span>
                     </div>
-                    <div className="flex justify-between pt-2 border-t border-cream-100">
-                      <span className="font-serif text-base text-charcoal-900">Total</span>
-                      <span className="font-serif text-xl text-gold-500">₹{total.toLocaleString('en-IN')}</span>
+                    <div className="flex justify-between pt-3 mt-2 border-t border-white/10">
+                      <span className="font-serif text-base text-white">Total</span>
+                      <span className="font-serif text-xl text-gold-400">₹{total.toLocaleString('en-IN')}</span>
                     </div>
                   </div>
-                  <p className="font-sans text-[10px] text-charcoal-300 text-center pt-2">
+                  <p className="font-sans text-[10px] text-white/30 text-center pt-4">
                     Payment at property · Free cancellation 24h prior
                   </p>
                 </div>
@@ -367,8 +423,9 @@ export default function ReserveRoom() {
             </div>
           </div>
         </div>
+
+        <Footer />
       </div>
-      <Footer />
-    </>
+    </div>
   );
 }

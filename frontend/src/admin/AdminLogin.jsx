@@ -60,7 +60,7 @@ export default function AdminLogin() {
               <input type="email" value={form.email}
                 onChange={e => { setForm(p => ({...p, email: e.target.value})); setErrors(p => ({...p, email:''})); }}
                 className="w-full bg-transparent border-b border-white/15 py-2.5 text-sm text-white font-sans font-light placeholder:text-white/20 focus:outline-none focus:border-gold-400 transition-colors"
-                placeholder="admin@shivamresort.com" />
+                placeholder="example@gmail.com" />
               {errors.email && <p className="text-red-400 text-xs mt-1 font-sans">{errors.email}</p>}
             </div>
             <div>
