@@ -112,16 +112,6 @@ Frontend runs at: `http://localhost:5173`
 | Room Reservations     | `/admin/room-reservations`      |
 | Contact Enquiries     | `/admin/enquiries`              |
 
----
-
-## 🔐 Default Admin Credentials
-
-```
-Email:    admin@shivamrestaurant.com
-Password: Admin@123
-```
-
-> ⚠️ Change these in `backend/.env` before going to production.
 
 ---
 
