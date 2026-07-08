@@ -80,7 +80,7 @@ export default function ReserveRoom() {
 
   const handleSubmit = async () => {
     setSubmitting(true); setError('');
-    try {
+   try {
       await api.post('/reservations/room', { ...form, checkIn, checkOut, roomType: selected.type, guests: Number(guests) });
       setDone(true);
     } catch (err) {
