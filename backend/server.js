@@ -1,6 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import cron from 'node-cron';
 import connectDB from './config/db.js';
 import { notFound, errorHandler } from './middleware/error.js';
@@ -30,7 +32,6 @@ import {
   sendRetentionMessage, sendBirthdayWish, sendBirthdayReminder
 } from './services/whatsappService.js';
 
-dotenv.config();
 connectDB();
 
 const app = express();

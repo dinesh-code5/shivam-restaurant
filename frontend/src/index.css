@@ -240,6 +240,33 @@ p, li, label, input, select, textarea, button, a {
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255,255,255,0.08);
 }
+.glass-luxury {
+  background: rgba(17, 17, 17, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.btn-taj-gold {
+  background-color: #b49041;
+  color: #ffffff !important;
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-taj-gold:hover {
+  background-color: #a27f33;
+  box-shadow: 0 4px 15px rgba(180, 144, 65, 0.4);
+}
 
 /* ── Animations ─────────────────────────────────────────── */
 @keyframes fadeUp {
@@ -249,6 +276,13 @@ p, li, label, input, select, textarea, button, a {
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+@keyframes kenburns {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
+}
+.animate-ken-burns {
+  animation: kenburns 12s ease-out infinite alternate;
 }
 
 .anim-fade-up   { animation: fadeUp 0.85s cubic-bezier(0.16,1,0.3,1) forwards; }

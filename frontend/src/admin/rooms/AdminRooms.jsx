@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 
-const TYPES = ['Deluxe Room','Premium Suite','Family Room','Banquet Hall'];
-const EMPTY = { name:'', type:'Deluxe Room', description:'', price:'', capacity:2, size:'', amenities:'', isAvailable:true, roomNumber:'' };
+const TYPES = ['Deluxe Room','Premium Suite','Family Room','Banquet Hall', 'Maharaja Room'];
+const EMPTY = { name:'', type:'Deluxe Room', description:'', price:'', capacity:2, size:'', amenities:'', otherAmenities:'', isAvailable:true, roomNumber:'' };
 
 const MOCK = [
   { _id:'1', name:'Royal Deluxe Room', type:'Deluxe Room', price:2500, capacity:2, size:'320 sq ft', amenities:['AC','WiFi','TV','Hot Water'], isAvailable:true, roomNumber:'101', images:[] },
@@ -16,6 +16,7 @@ const TYPE_STYLE = {
   'Premium Suite':'bg-gold-50 text-gold-700 border border-gold-200',
   'Family Room':  'bg-green-50 text-green-700 border border-green-200',
   'Banquet Hall': 'bg-purple-50 text-purple-700 border border-purple-200',
+  'Maharaja Room': 'bg-red-50 text-red-700 border border-red-200',
 };
 
 export default function AdminRooms() {
@@ -52,7 +53,6 @@ export default function AdminRooms() {
     setSaving(true); setError(''); setSuccess('');
     try {
       const formData = new FormData();
-      // Ensure all required fields are explicitly appended
       formData.append('name', form.name);
       formData.append('type', form.type);
       formData.append('price', form.price);
@@ -62,21 +62,42 @@ export default function AdminRooms() {
       formData.append('description', form.description);
       formData.append('isAvailable', form.isAvailable);
 
-      const finalAmenities = [...form.amenities, ...form.otherAmenities.split(',').map(a => a.trim()).filter(Boolean)];
-      formData.append('amenities', finalAmenities.join(','));
+      const amenitiesArray = [
+        ...(typeof form.amenities === 'string' ? form.amenities.split(',').map(a => a.trim()).filter(Boolean) : []),
+        ...(form.otherAmenities ? form.otherAmenities.split(',').map(a => a.trim()).filter(Boolean) : [])
+      ];
+      formData.append('amenities', amenitiesArray.join(','));
       
       if (image) formData.append('image', image);
+      
+      console.log('DEBUG: Sending FormData:');
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+      
+      console.log('DEBUG: Final image state:', image);
       
       if (offline) {
         setSuccess(`Room ${editing ? 'updated' : 'created'} (demo mode).`);
       } else {
-        if (editing) await api.put(`/rooms/manage/${editing}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-        else await api.post('/rooms/manage', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        console.log('DEBUG: Sending API request...');
+        const response = await api({
+          method: editing ? 'put' : 'post',
+          url: editing ? `/rooms/manage/${editing}` : '/rooms/manage',
+          data: formData,
+          
+        });
+        
+        console.log('DEBUG: API response:', response.data);
+        console.log('DEBUG: images field:', response.data.data?.images);
         setSuccess(`Room ${editing ? 'updated' : 'created'}.`);
         fetchRooms();
       }
       setShowForm(false); setEditing(null); setImage(null);
-    } catch (err) { setError(err.response?.data?.message || 'Operation failed.'); }
+    } catch (err) {
+      console.error('Frontend Error:', err.response?.data || err);
+      setError(err.response?.data?.message || 'Operation failed.');
+    }
     finally { setSaving(false); }
   };
 
@@ -133,6 +154,14 @@ export default function AdminRooms() {
             <div><label className="label-luxury">Description</label><textarea rows={2} className="input-luxury resize-none" value={form.description} onChange={e => setForm(p => ({...p, description: e.target.value}))} /></div>
             <div>
               <label className="label-luxury">Room Image</label>
+              {/* Show existing image when editing and no new file chosen yet */}
+              {!image && editing && form.images?.[0] && (
+                <img src={form.images[0]} alt="Current room" className="w-32 h-20 object-cover mb-2 border border-cream-200" />
+              )}
+              {/* Show preview of newly selected file */}
+              {image && (
+                <img src={URL.createObjectURL(image)} alt="Preview" className="w-32 h-20 object-cover mb-2 border border-cream-200" />
+              )}
               <input type="file" className="input-luxury" accept="image/*" onChange={e => setImage(e.target.files[0])} />
             </div>
             <label className="flex items-center gap-2 cursor-pointer font-sans text-sm text-charcoal-600">
@@ -155,7 +184,7 @@ export default function AdminRooms() {
               {/* Image */}
               <div className="h-40 bg-charcoal-900 relative overflow-hidden flex items-center justify-center">
                 {room.images && room.images.length > 0 ? (
-                  <img src={room.images[0]} alt={room.name} className="w-full h-full object-cover" />
+                  <img src={room.images[0].startsWith('http') ? room.images[0] : `${import.meta.env.VITE_API_URL}${room.images[0]}`} className="w-full h-full object-cover" />
                 ) : (
                   <>
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(201,162,39,0.12),transparent_60%)]" />

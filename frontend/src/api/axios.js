@@ -10,6 +10,15 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  console.log('DEBUG: Axios outgoing request:', config.method, config.url);
+  if (config.data instanceof FormData) {
+      console.log('DEBUG: Axios request body is FormData:');
+      for (let pair of config.data.entries()) {
+          console.log(pair[0], pair[1]);
+      }
+  } else {
+      console.log('DEBUG: Axios request body:', config.data);
+  }
   const token = localStorage.getItem('shivam_admin_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
 export const protect = async (req, res, next) => {
+  console.log('DEBUG: Auth middleware checking request:', req.method, req.originalUrl);
   try {
     let token;
     const authHeader = req.headers.authorization;
