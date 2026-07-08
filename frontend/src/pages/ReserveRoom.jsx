@@ -81,7 +81,7 @@ export default function ReserveRoom() {
   const handleSubmit = async () => {
     setSubmitting(true); setError('');
     try {
-      await api.post('/reservations/room', { ...form, checkIn, checkOut, roomType: selected.name, guests: Number(guests) });
+      await api.post('/reservations/room', { ...form, checkIn, checkOut, roomType: selected.type, guests: Number(guests) });
       setDone(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Booking failed. Please try again.');
