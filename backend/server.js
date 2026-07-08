@@ -37,7 +37,7 @@ connectDB();
 const app = express();
 
 app.use(cors({
-      origin: ['https://shivam-resort-restaurant.netlify.app', 'http://localhost:3000'],
+      origin: ['https://shivam-resort-restaurant.netlify.app', 'http://localhost:3000', 'http://localhost:5173'],
       credentials: true
     }));
 app.use(express.json({ limit: '10mb' }));
