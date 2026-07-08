@@ -28,6 +28,7 @@ const upload = multer({ storage });
 
 // GET /api/rooms/manage — all rooms with full details (admin)
 router.get('/manage', protect, async (req, res, next) => {
+  console.log('DEBUG: GET /manage route handler reached!');
   try {
     const rooms = await Room.find().sort({ type: 1 });
     res.json({ success: true, data: rooms });
