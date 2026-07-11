@@ -31,7 +31,7 @@ export default function Gallery() {
 
   return (
     <div 
-      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed relative text-white"
+      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed relative text-white pt-[64px] md:pt-[80px]"
       style={{ backgroundImage: `url(${BG_IMAGE})` }}
     >
       {/* Dark Overlay */}
@@ -51,7 +51,7 @@ export default function Gallery() {
         </section>
 
         {/* Filter sticky bar */}
-        <div className=" border-t border-b border-white/5 sticky top-16 md:top-20 z-30 backdrop-blur-md">
+        <div className="border-t border-b border-white/5 sticky top-[68px] md:top-[100px] z-30 backdrop-blur-md">
           <div className="container-lux flex items-center gap-1 py-3.5 overflow-x-auto scrollbar-hide">
             {FILTERS.map(f => (
               <button 
@@ -64,7 +64,7 @@ export default function Gallery() {
                 {f}
               </button>
             ))}
-            <span className="ml-auto font-sans text-[11px] text-white/40 tracking-wider whitespace-nowrap">{items.length} images</span>
+            <span className="ml-auto font-sans text-[10px] text-white/40 tracking-wider whitespace-nowrap hidden sm:block">{items.length} images</span>
           </div>
         </div>
 

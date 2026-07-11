@@ -38,7 +38,7 @@ export default function Menu() {
 
   return (
     <div 
-      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed relative text-white"
+      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed relative text-white pt-[64px] md:pt-[80px]"
       style={{ backgroundImage: `url(${BG_IMAGE})` }}
     >
       {/* Dark Overlay */}
@@ -49,7 +49,7 @@ export default function Menu() {
 
         {/* QR Table Banner */}
         {tableNumber && (
-          <div className="fixed top-16 md:top-20 left-0 right-0 z-40 bg-gold-gradient py-2.5 text-center shadow-lg">
+          <div className="fixed top-[64px] md:top-[80px] left-0 right-0 z-40 bg-gold-gradient py-2.5 text-center shadow-lg">
             <p className="font-sans text-xs font-semibold text-charcoal-900 tracking-wide">
               📱 Viewing menu for <strong>Table {tableNumber}</strong> — Your waiter will take your order
             </p>
@@ -57,7 +57,7 @@ export default function Menu() {
         )}
 
         {/* Header */}
-        <section className={`relative overflow-hidden ${tableNumber ? 'pt-36' : 'pt-32'} pb-20`}>
+        <section className={`relative overflow-hidden ${tableNumber ? 'pt-40' : 'pt-32'} pb-20`}>
           <div className="container-lux relative z-10 text-center">
             <p className="eyebrow text-gold-400 mb-4">Veg & Jain Friendly</p>
             <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl font-light text-white mb-4">Our Menu</h1>
@@ -69,7 +69,7 @@ export default function Menu() {
         </section>
 
         {/* Sticky category filter bar — Translucent Dark */}
-        <div className="sticky top-16 md:top-20 z-30 border-t border-b border-white/5 backdrop-blur-md">
+        <div className={`sticky ${tableNumber ? 'top-[140px] md:top-[150px]' : 'top-[68px] md:top-[100px]'} z-30 border-t border-b border-white/5 backdrop-blur-md`}>
           <div className="container-lux">
             <div className="flex items-center gap-1 overflow-x-auto py-3.5 scrollbar-hide">
               {CATEGORIES.map(cat => (

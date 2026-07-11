@@ -33,9 +33,6 @@ import AdminRooms              from './admin/rooms/AdminRooms';
 import WaiterPanel from './waiter/WaiterPanel';
 
 function AppRoutes() {
-  const { pathname } = useLocation();
-  const isStaff = pathname.startsWith('/admin') || pathname.startsWith('/waiter') || pathname.startsWith('/feedback');
-
   return (
     <Routes>
       {/* Public */}
