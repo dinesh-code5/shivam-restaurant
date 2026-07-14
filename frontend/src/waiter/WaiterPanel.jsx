@@ -39,9 +39,24 @@ const orderStatus = {
   served: 'text-charcoal-600 bg-cream-100 border-cream-200',
 };
 
+let userInteracted = false;
+
+const enableAudio = () => {
+  userInteracted = true;
+  window.removeEventListener('click', enableAudio);
+  window.removeEventListener('keydown', enableAudio);
+  window.removeEventListener('touchstart', enableAudio);
+};
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('click', enableAudio);
+  window.addEventListener('keydown', enableAudio);
+  window.addEventListener('touchstart', enableAudio);
+}
+
 export default function WaiterPanel() {
   const navigate = useNavigate();
-  const audioRef = useRef(new Audio('/bell.mp3'));
+  const audioRef = useRef(new Audio('/bell.wav'));
   const [step, setStep] = useState('tables');
   const [tables, setTables] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
@@ -82,7 +97,7 @@ export default function WaiterPanel() {
         try {
             const res = await api.get('/kot?status=ready');
             const readyKOTs = res.data.data;
-            if (readyKOTs.length > 0) {
+            if (readyKOTs.length > 0 && userInteracted) {
                 audioRef.current.play().catch(e => console.log('Autoplay blocked'));
             }
         } catch (err) {}

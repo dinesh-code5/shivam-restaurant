@@ -13,7 +13,8 @@ const convertNumberToWords = (num) => {
   str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'thousand ' : '';
   str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'hundred ' : '';
   str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
-  return str.trim() + ' only';
+  const result = str.trim() + ' only';
+  return result.charAt(0).toUpperCase() + result.slice(1);
 };
 
 export const generateInvoicePDF = async (invoice) => {
@@ -94,8 +95,8 @@ export const generateInvoicePDF = async (invoice) => {
 
     doc.rect(350, sY + 5, 210, 35).fill(dark);
     doc.fillColor(gold).font('Helvetica-Bold').fontSize(14)
-       .text('GRAND TOTAL:', 350, sY + 14, { width: 130, align: 'right' })
-       .text(`₹${Number(invoice.total).toFixed(2)}`, 450, sY + 14, { width: 70, align: 'right' });
+       .text('GRAND TOTAL:', 350, sY + 14, { width: 90, align: 'right' })
+       .text(`₹${Number(invoice.total).toFixed(2)}`, 440, sY + 14, { width: 120, align: 'right' });
 
     doc.fillColor(dark).font('Helvetica-Oblique').fontSize(8)
        .text(`In words: ${convertNumberToWords(invoice.total)}`, 40, sY + 50);
@@ -107,7 +108,9 @@ export const generateInvoicePDF = async (invoice) => {
        .text(`Verified By: Admin | Time: ${new Date(invoice.paidAt).toLocaleString()}`, 40, sY + 100);
 
     // QR
-    const qrCode = await QRCode.toDataURL(`Invoice:${invoice.invoiceNumber}`);
+    // Using a placeholder frontend URL for invoice lookup. Replace with actual environment variable in production.
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const qrCode = await QRCode.toDataURL(`${baseUrl}/invoice/${invoice._id}`);
     doc.image(qrCode, 450, sY + 60, { width: 70 });
 
     // Footer

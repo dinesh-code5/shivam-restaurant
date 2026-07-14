@@ -68,11 +68,16 @@ export default function AdminRooms() {
       ];
       formData.append('amenities', amenitiesArray.join(','));
       
-      if (image) formData.append('image', image);
+      if (image) {
+        console.log('DEBUG: Appending image to FormData:', image.name, image.type, image.size);
+        formData.append('image', image);
+      } else {
+        console.log('DEBUG: No image selected.');
+      }
       
       console.log('DEBUG: Sending FormData:');
       for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
+        console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
       }
       
       console.log('DEBUG: Final image state:', image);
@@ -80,12 +85,12 @@ export default function AdminRooms() {
       if (offline) {
         setSuccess(`Room ${editing ? 'updated' : 'created'} (demo mode).`);
       } else {
-        console.log('DEBUG: Sending API request...');
+        console.log('DEBUG: Sending API request to', editing ? `/rooms/manage/${editing}` : '/rooms/manage');
         const response = await api({
           method: editing ? 'put' : 'post',
           url: editing ? `/rooms/manage/${editing}` : '/rooms/manage',
           data: formData,
-          
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
         
         console.log('DEBUG: API response:', response.data);

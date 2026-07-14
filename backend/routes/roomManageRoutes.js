@@ -15,6 +15,7 @@ const configureCloudinary = () => {
     api_secret: process.env.CLOUDINARY_API_SECRET,
   });
 };
+configureCloudinary(); 
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -122,13 +123,12 @@ router.put('/manage/:id', protect, upload.any(), async (req, res, next) => {
       isAvailable: isAvailable === 'true' || isAvailable === true,
       amenities: amenities ? amenities.split(',').map(a => a.trim()).filter(Boolean) : [],
     };
-
     if (imageFile) {
       updateData.images = [imageFile.path];
-    } else {
-      // Fallback: keep existing images or use a default placeholder
-      updateData.images = existingRoom.images.length > 0 ? existingRoom.images : ['https://via.placeholder.com/400x200?text=No+Image'];
-    }
+      } else {
+      // keep existing images if any were already set; otherwise leave empty
+      updateData.images = existingRoom.images.length > 0 ? existingRoom.images : [];
+      }
 
     const room = await Room.findByIdAndUpdate(req.params.id, updateData, {
       new: true,

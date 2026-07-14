@@ -380,10 +380,10 @@ export default function ReserveRoom() {
                 <div className="space-y-3">
                   <div className="bg-charcoal-950 -mx-6 -mt-5 mb-5 overflow-hidden">
                     <img 
-                      src={selected.images[0] || '/placeholder-room.jpg'} 
+                      src={selected.images[0] || '/placeholder-room.jpeg'} 
                       alt={selected.name} 
                       className="w-full h-40 object-cover"
-                      onError={(e) => e.target.src = '/placeholder-room.jpg'}
+                      onError={(e) => e.target.src = '/placeholder-room.jpeg'}
                     />
                     <div className="px-6 py-4 bg-charcoal-900/90 border-b border-white/5">
                       <p className="font-serif text-xl text-white font-light">{selected.name}</p>

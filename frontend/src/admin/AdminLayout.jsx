@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from '../components/NotificationBell';
 
 const NAV = [
   { path: '/admin/dashboard',         label: 'Dashboard',         icon: '📊' },
@@ -93,7 +94,7 @@ export default function AdminLayout() {
             </svg>
           </button>
           <span className="font-sc text-sm font-semibold text-charcoal-900 tracking-widest uppercase">Management</span>
-          <div className="w-8"></div> {/* Spacer for alignment */}
+          <NotificationBell />
         </header>
         
         <main className="flex-1 p-4 md:p-8 overflow-y-auto">

@@ -78,9 +78,10 @@ export default function AdminDashboard() {
           <h1 className="font-serif text-2xl sm:text-3xl text-charcoal-900 font-light">Dashboard</h1>
           <p className="font-sans text-xs text-charcoal-400 mt-0.5">Welcome back · Shivam Resort & Restaurant</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Link to="/admin/tables" className="btn-primary text-[10px] px-4 py-2">Live Tables</Link>
           <Link to="/admin/kitchen" className="btn-outline dark text-[10px] px-4 py-2">Kitchen View</Link>
+          <Link to="/waiter" className="btn-outline dark text-[10px] px-4 py-2">Waiter View</Link>
         </div>
       </div>
 

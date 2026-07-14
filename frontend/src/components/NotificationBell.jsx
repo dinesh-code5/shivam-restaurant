@@ -2,24 +2,48 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
+let userInteracted = false;
+
+const enableAudio = () => {
+  userInteracted = true;
+  window.removeEventListener('click', enableAudio);
+  window.removeEventListener('keydown', enableAudio);
+  window.removeEventListener('touchstart', enableAudio);
+};
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('click', enableAudio);
+  window.addEventListener('keydown', enableAudio);
+  window.addEventListener('touchstart', enableAudio);
+}
+
 const NotificationBell = () => {
   const [notifs, setNotifs] = useState([]);
   const [count, setCount] = useState(0);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const navigate = useNavigate();
-  const audioRef = useRef(new Audio('/bell.mp3'));
+  const isInitial = useRef(true);
+  const audioRef = useRef(new Audio('/bell.wav'));
+
+  const [lastCount, setLastCount] = useState(0);
 
   const fetchNotifs = async () => {
     try {
       const res = await api.get('/notifications');
       const newNotifs = res.data.data || [];
-      // Only play sound if new notifications arrived and they are actually new
-      if (newNotifs.length > notifs.length) {
-        audioRef.current.play().catch(e => console.log('Autoplay blocked'));
+      const newCount = res.data.count || 0;
+      
+      // Only play sound if new notifications arrived and the total count increased
+      if (!isInitial.current && newCount > lastCount) {
+        if (userInteracted) {
+          audioRef.current.play().catch(e => console.log('Autoplay blocked'));
+        }
       }
+      isInitial.current = false;
       setNotifs(newNotifs);
-      setCount(res.data.count || 0);
+      setCount(newCount);
+      setLastCount(newCount);
     } catch {}
   };
 
