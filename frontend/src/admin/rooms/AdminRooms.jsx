@@ -2,7 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import api from '../../api/axios';
 
 const TYPES = ['Deluxe Room','Premium Suite','Family Room','Banquet Hall'];
-const EMPTY = { name:'', type:'Deluxe Room', description:'', price:'', capacity:2, size:'', amenities:'', isAvailable:true, roomNumber:'', images:[] };
+const COMMON_AMENITIES = ['AC', 'WiFi', 'TV', 'Hot Water', 'Mini Bar', 'Jacuzzi', 'Balcony', 'Extra Beds', 'Lounge', 'Stage', 'AV System', 'Catering'];
+const EMPTY = { name:'', type:'Deluxe Room', description:'', price:'', capacity:2, size:'', amenities:[], otherAmenities:'', isAvailable:true, roomNumber:'', images:[] };
 
 const TYPE_STYLE = {
   'Deluxe Room':  'bg-blue-50 text-blue-700 border border-blue-200',
@@ -211,20 +212,34 @@ export default function AdminRooms() {
               </div>
             </div>
 
-            {/* Size + Amenities */}
-            <div className="grid sm:grid-cols-2 gap-5">
-              <div>
-                <label className="label-luxury">Size</label>
-                <input className="input-luxury" value={form.size}
-                  onChange={e => setForm(p => ({ ...p, size: e.target.value }))}
-                  placeholder="e.g. 320 sq ft" />
+            {/* Amenities Checklist */}
+            <div>
+              <label className="label-luxury mb-2 block">Common Amenities</label>
+              <div className="grid grid-cols-3 gap-2">
+                {COMMON_AMENITIES.map(amenity => (
+                  <label key={amenity} className="flex items-center gap-2 font-sans text-xs text-charcoal-600 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.amenities.includes(amenity)}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setForm(p => ({
+                          ...p,
+                          amenities: checked
+                            ? [...p.amenities, amenity]
+                            : p.amenities.filter(a => a !== amenity)
+                        }));
+                      }}
+                      className="accent-gold-400"
+                    />
+                    {amenity}
+                  </label>
+                ))}
               </div>
-              <div>
-                <label className="label-luxury">Amenities (comma separated)</label>
-                <input className="input-luxury" value={form.amenities}
-                  onChange={e => setForm(p => ({ ...p, amenities: e.target.value }))}
-                  placeholder="AC, WiFi, TV, Hot Water" />
-              </div>
+              <label className="label-luxury mt-4 block">Other Amenities (comma separated)</label>
+              <input className="input-luxury" value={form.otherAmenities}
+                onChange={e => setForm(p => ({ ...p, otherAmenities: e.target.value }))}
+                placeholder="e.g. Sauna, Gym" />
             </div>
 
             {/* Description */}
