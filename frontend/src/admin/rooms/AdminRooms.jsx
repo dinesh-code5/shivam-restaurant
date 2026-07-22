@@ -21,6 +21,15 @@ const getImageUrl = (img) => {
   return `${base}${img}`;
 };
 
+// Convert file to base64
+const toBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
 export default function AdminRooms() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,9 +69,12 @@ export default function AdminRooms() {
   };
 
   const openEdit = (room) => {
+    const common = room.amenities?.filter(a => COMMON_AMENITIES.includes(a)) || [];
+    const others = room.amenities?.filter(a => !COMMON_AMENITIES.includes(a)) || [];
     setForm({
       ...room,
-      amenities: room.amenities?.join(', ') || '',
+      amenities: common,
+      otherAmenities: others.join(', '),
       price: room.price.toString(),
       images: room.images || [],
     });
@@ -79,7 +91,8 @@ export default function AdminRooms() {
     try {
       const base64Array = await Promise.all(files.map(f => toBase64(f)));
       setForm(p => ({ ...p, images: [...(p.images || []), ...base64Array] }));
-    } catch {
+    } catch (err) {
+      console.error('Image processing error:', err);
       setError('Failed to process images. Try smaller files.');
     } finally {
       setUploadingImgs(false);
