@@ -100,12 +100,15 @@ export default function Navbar() {
               className="lg:hidden text-white p-1.5 focus:outline-none"
               aria-label="Toggle menu"
             >
-              <span className="block w-5.5 h-px bg-current mb-1.5 transition-all duration-300"
-                style={{ transform: open ? 'rotate(45deg) translate(5px, 5px)' : '' }} />
-              <span className="block w-5.5 h-px bg-current mb-1.5 transition-all duration-300"
-                style={{ opacity: open ? 0 : 1 }} />
-              <span className="block w-5.5 h-px bg-current transition-all duration-300"
-                style={{ transform: open ? 'rotate(-45deg) translate(5px, -5px)' : '' }} />
+              {open ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
