@@ -11,14 +11,14 @@ const TYPE_STYLE = {
   'Banquet Hall': 'bg-purple-50 text-purple-700 border border-purple-200',
 };
 
-// Convert file to base64
-const toBase64 = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+// Utility to build image URL
+const getImageUrl = (img) => {
+  if (!img) return '';
+  if (img.startsWith('http') || img.startsWith('data:image/')) return img;
+  const apiURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const base = apiURL.endsWith('/api') ? apiURL.slice(0, -4) : apiURL;
+  return `${base}${img}`;
+};
 
 export default function AdminRooms() {
   const [rooms, setRooms] = useState([]);
@@ -329,7 +329,7 @@ export default function AdminRooms() {
                     <>
                       {/* Actual image */}
                       <img
-                        src={imgs[activeSlide]}
+                        src={getImageUrl(imgs[activeSlide])}
                         alt={room.name}
                         className="w-full h-full object-cover transition-opacity duration-500"
                       />

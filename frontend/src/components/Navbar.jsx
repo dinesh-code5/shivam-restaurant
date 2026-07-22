@@ -94,19 +94,29 @@ export default function Navbar() {
               </Link>
             </div>
 
-            {/* Hamburger button for mobile */}
-            <button
-              onClick={() => setOpen(p => !p)}
-              className="lg:hidden text-white p-1.5 focus:outline-none"
-              aria-label="Toggle menu"
-            >
-              <span className="block w-5.5 h-px bg-current mb-1.5 transition-all duration-300"
-                style={{ transform: open ? 'rotate(45deg) translate(5px, 5px)' : '' }} />
-              <span className="block w-5.5 h-px bg-current mb-1.5 transition-all duration-300"
-                style={{ opacity: open ? 0 : 1 }} />
-              <span className="block w-5.5 h-px bg-current transition-all duration-300"
-                style={{ transform: open ? 'rotate(-45deg) translate(5px, -5px)' : '' }} />
-            </button>
+            {/* Mobile Actions: Staff + Hamburger */}
+            <div className="lg:hidden flex items-center gap-3">
+              <Link
+                to="/admin"
+                className="font-sans text-[10px] tracking-[0.1em] uppercase text-gold-400 border border-gold-400 px-3 pb-3 py-1.5 hover:bg-gold-400 hover:text-charcoal-950 transition-colors"
+              >
+                Staff
+              </Link>
+
+              {/* Hamburger button for mobile */}
+              <button
+                onClick={() => setOpen(p => !p)}
+                className="text-white p-1.5 focus:outline-none"
+                aria-label="Toggle menu"
+              >
+                <span className="block w-5.5 h-px bg-current mb-1.5 transition-all duration-300"
+                  style={{ transform: open ? 'rotate(45deg) translate(5px, 5px)' : '' }} />
+                <span className="block w-5.5 h-px bg-current mb-1.5 transition-all duration-300"
+                  style={{ opacity: open ? 0 : 1 }} />
+                <span className="block w-5.5 h-px bg-current transition-all duration-300"
+                  style={{ transform: open ? 'rotate(-45deg) translate(5px, -5px)' : '' }} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -132,12 +142,6 @@ export default function Navbar() {
               className="block py-3 border-b border-white/5 font-sans text-[11px] tracking-[0.2em] uppercase text-white/70 hover:text-gold-400 transition-colors"
             >
               STAFF LOGIN
-            </Link>
-            <Link
-              to="/admin"
-              className="block py-3 border-b border-white/5 font-sans text-[11px] tracking-[0.2em] uppercase text-gold-400 font-semibold hover:text-gold-300 transition-colors"
-            >
-              STAFF DASHBOARD
             </Link>
             <div className="pt-4">
               <Link
