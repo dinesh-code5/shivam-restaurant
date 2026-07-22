@@ -9,6 +9,14 @@ import api from '../api/axios';
 const BG_IMAGE = "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1920&q=80";
 const STEPS = ['Select Room', 'Personal Details', 'Confirm Booking'];
 
+const getImageUrl = (img) => {
+  if (!img) return '';
+  if (img.startsWith('http') || img.startsWith('data:image/')) return img;
+  const apiURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const base = apiURL.endsWith('/api') ? apiURL.slice(0, -4) : apiURL;
+  return `${base}${img}`;
+};
+
 export default function ReserveRoom() {
   const location = useLocation();
   const state = location.state || {};
@@ -380,7 +388,7 @@ export default function ReserveRoom() {
                 <div className="space-y-3">
                   <div className="bg-charcoal-950 -mx-6 -mt-5 mb-5 overflow-hidden">
                     <img 
-                      src={selected.images[0] || '/placeholder-room.jpeg'} 
+                      src={getImageUrl(selected.images[0]) || '/placeholder-room.jpeg'} 
                       alt={selected.name} 
                       className="w-full h-40 object-cover"
                       onError={(e) => e.target.src = '/placeholder-room.jpeg'}

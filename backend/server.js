@@ -40,9 +40,10 @@ app.use(cors({
       origin: ['https://shivam-resort-restaurant.netlify.app', 'http://localhost:3000', 'http://localhost:5173'],
       credentials: true
     }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/uploads', express.static('uploads'));
+app.use('/api/uploads', express.static('uploads'));
 app.use((req, res, next) => {
   console.log(`DEBUG: Incoming request: ${req.method} ${req.originalUrl}`);
   console.log(`DEBUG: Content-Type header: ${req.headers['content-type']}`);

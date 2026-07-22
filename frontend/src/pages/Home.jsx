@@ -35,6 +35,14 @@ function Stars({ n }) {
   );
 }
 
+const getImageUrl = (img) => {
+  if (!img) return '';
+  if (img.startsWith('http') || img.startsWith('data:image/')) return img;
+  const apiURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const base = apiURL.endsWith('/api') ? apiURL.slice(0, -4) : apiURL;
+  return `${base}${img}`;
+};
+
 export default function Home() {
   const [reviews, setReviews] = useState(MOCK_REVIEWS);
   const [featuredMenu, setFeaturedMenu] = useState([]);
@@ -196,7 +204,7 @@ export default function Home() {
                   <div className="glass-luxury group flex flex-col h-full border border-white/10 hover:border-gold-400/30 transition-all duration-300">
                     <div className="relative h-52 overflow-hidden bg-charcoal-950">
                       {room.images && room.images.length > 0 ? (
-                        <img src={room.images[0]} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <img src={getImageUrl(room.images[0])} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       ) : (
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(201,162,39,0.12),transparent_60%)]" />
                       )}

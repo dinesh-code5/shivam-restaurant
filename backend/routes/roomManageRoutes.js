@@ -1,35 +1,13 @@
 import express from 'express';
-import multer from 'multer';
-import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import Room from '../models/Room.js';
 import { protect } from '../middleware/auth.js';
+import { saveBase64Image } from '../utils/uploadHelper.js';
 
 const router = express.Router();
-console.log('DEBUG: roomManageRoutes.js is being loaded!');
-// Cloudinary Configuration
-const configureCloudinary = () => {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-};
-configureCloudinary(); 
-
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'restaurant_rooms',
-    format: async (req, file) => 'png',
-    public_id: (req, file) => `${Date.now()}-${file.originalname}`,
-  },
-});
-const upload = multer({ storage });
+console.log('DEBUG: roomManageRoutes.js is loaded');
 
 // GET /api/rooms/manage — all rooms with full details (admin)
 router.get('/manage', protect, async (req, res, next) => {
-  console.log('DEBUG: GET /manage route handler reached!');
   try {
     const rooms = await Room.find().sort({ type: 1 });
     res.json({ success: true, data: rooms });
@@ -44,38 +22,54 @@ router.get('/manage/public', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// // POST /api/rooms/manage
-// router.post('/manage', protect, upload.any(), async (req, res, next) => {
-//   console.log('DEBUG: Received POST /manage request (upload.any())');
-//   console.log('DEBUG: req.body (after multer):', req.body);
-//   console.log('DEBUG: req.files (after multer):', req.files);
-//   console.log('DEBUG: req.file (after multer):', req.file);
-  
-//   res.status(200).json({ success: true, message: 'Check console logs' });
-// });
-
-// PUT /api/rooms/manage/:id
 // POST /api/rooms/manage
-router.post('/manage', protect, upload.any(), async (req, res, next) => {
+router.post('/manage', protect, async (req, res, next) => {
   console.log('DEBUG: --- POST /manage request received ---');
   console.log('DEBUG: req.body keys:', Object.keys(req.body));
-  console.log('DEBUG: req.files exists:', !!req.files);
-  if (req.files) {
-      console.log('DEBUG: req.files count:', req.files.length);
-      req.files.forEach((f, i) => {
-          console.log(`DEBUG: File ${i}: fieldname=${f.fieldname}, originalname=${f.originalname}, mimetype=${f.mimetype}`);
-      });
-  }
-
+  console.log('DEBUG: req.body.amenities type:', typeof req.body.amenities);
+  console.log('DEBUG: req.body.amenities value:', JSON.stringify(req.body.amenities));
+  
   try {
     const {
       name, type, price, capacity, size, roomNumber,
-      description, isAvailable, amenities
+      description, isAvailable, amenities, images
     } = req.body;
+    
+    if (!images) {
+        console.log('DEBUG: imagess is undefined/null in destructuring. Inspecting req.body:', JSON.stringify(req.body).substring(0, 1000));
+    }
+    
+    console.log('DEBUG: Received images in body:', !!images);
 
-    const imageFile = req.files?.find(f => f.fieldname === 'image');
-    console.log('DEBUG: matched imageFile:', imageFile);
+    let imagePaths = [];
 
+    if (Array.isArray(images) && images.length > 0) {
+      try {
+        imagePaths = images.map(img => saveBase64Image(img));
+        console.log('DEBUG: Saved images locally:', imagePaths);
+      } catch (err) {
+        console.error('DEBUG: Base64 image saving failed:', err.message);
+      }
+    } else if (typeof images === 'string') {
+      try {
+        imagePaths = [saveBase64Image(images)];
+        console.log('DEBUG: Saved image locally:', imagePaths);
+      } catch (err) {
+        console.error('DEBUG: Base64 image saving failed:', err.message);
+      }
+    }
+    let amenitiesArray = [];
+    if (Array.isArray(amenities)) {
+      amenitiesArray = amenities;
+    } else if (typeof amenities === 'string') {
+      amenitiesArray = amenities
+        .split(',')
+        .map(a => a.trim())
+        .filter(Boolean);
+    } else {
+      console.log('DEBUG: amenities is neither array nor string, type is:', typeof amenities);      // Fallback for null/undefined/other types
+      amenitiesArray = [];
+    }
     const room = await Room.create({
       name,
       type,
@@ -85,50 +79,80 @@ router.post('/manage', protect, upload.any(), async (req, res, next) => {
       roomNumber,
       description,
       isAvailable: isAvailable === 'true' || isAvailable === true,
-      amenities: amenities ? amenities.split(',').map(a => a.trim()).filter(Boolean) : [],
-      images: imageFile ? [imageFile.path] : [],
+      amenities:amenitiesArray,
+      images: imagePaths , // stored filename path
     });
+    
+    console.log('DEBUG: Saved room images field:', room.images);
 
     res.status(201).json({ success: true, data: room });
-  } catch (err) {
-    console.error('DEBUG: Room create error:', err);
-    next(err);
+  } catch (err) { 
+    console.error('DEBUG: POST Error:', err);
+    next(err); 
   }
 });
 
 // PUT /api/rooms/manage/:id
-router.put('/manage/:id', protect, upload.any(), async (req, res, next) => {
+router.put('/manage/:id', protect, async (req, res, next) => {
   try {
     const {
       name, type, price, capacity, size, roomNumber,
-      description, isAvailable, amenities
+      description, isAvailable, amenities, images
     } = req.body;
 
-    // Fetch existing room to preserve old image if no new one is uploaded
     const existingRoom = await Room.findById(req.params.id);
     if (!existingRoom) {
       return res.status(404).json({ success: false, message: 'Room not found' });
     }
 
-    const imageFile = req.files?.find(f => f.fieldname === 'image');
+    let amenitiesArray = [];
+    if (Array.isArray(amenities)) {
+      amenitiesArray = amenities;
+    } else if (typeof amenities === 'string') {
+      amenitiesArray = amenities
+        .split(',')
+        .map(a => a.trim())
+        .filter(Boolean);
+    } else {
+      // Fallback for null/undefined/other types
+      amenitiesArray = [];
+    }
+      const updateData = {
+        name,
+        type,
+        price: Number(price),
+        capacity: Number(capacity),
+        size,
+        roomNumber,
+        description,
+        isAvailable: isAvailable === 'true' || isAvailable === true,
+        amenities: amenitiesArray,
+      };
+  if (images && Array.isArray(images) && images.length > 0) {
+    try {
+      const imagePaths = images.map(img => saveBase64Image(img));
 
-    const updateData = {
-      name,
-      type,
-      price: Number(price),
-      capacity: Number(capacity),
-      size,
-      roomNumber,
-      description,
-      isAvailable: isAvailable === 'true' || isAvailable === true,
-      amenities: amenities ? amenities.split(',').map(a => a.trim()).filter(Boolean) : [],
-    };
-    if (imageFile) {
-      updateData.images = [imageFile.path];
-      } else {
-      // keep existing images if any were already set; otherwise leave empty
-      updateData.images = existingRoom.images.length > 0 ? existingRoom.images : [];
-      }
+      console.log('DEBUG: Saved updated images locally:', imagePaths);
+
+      updateData.images = imagePaths;
+    } catch (err) {
+      console.error('DEBUG: Base64 images saving failed on update:', err.message);
+      updateData.images = existingRoom.images?.length > 0 ? existingRoom.images : [];
+    }
+  } else if (typeof images === 'string') {
+    try {
+      const imagePath = saveBase64Image(images);
+
+      console.log('DEBUG: Saved updated image locally:', imagePath);
+
+      updateData.images = [imagePath];
+    } catch (err) {
+      console.error('DEBUG: Base64 image saving failed on update:', err.message);
+      updateData.images = existingRoom.images?.length > 0 ? existingRoom.images : [];
+    }
+  } else {
+    updateData.images = existingRoom.images?.length > 0 ? existingRoom.images : [];
+  }
 
     const room = await Room.findByIdAndUpdate(req.params.id, updateData, {
       new: true,

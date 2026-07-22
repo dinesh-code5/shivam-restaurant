@@ -57,6 +57,8 @@ if (typeof window !== 'undefined') {
 export default function WaiterPanel() {
   const navigate = useNavigate();
   const audioRef = useRef(new Audio('/bell.wav'));
+  const isInitialKOT = useRef(true);
+  const knownReadyKOTIds = useRef(new Set());
   const [step, setStep] = useState('tables');
   const [tables, setTables] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
@@ -94,13 +96,21 @@ export default function WaiterPanel() {
   // Poll for ready KOTs
   useEffect(() => {
     const checkKOTs = async () => {
-        try {
-            const res = await api.get('/kot?status=ready');
-            const readyKOTs = res.data.data;
-            if (readyKOTs.length > 0 && userInteracted) {
-                audioRef.current.play().catch(e => console.log('Autoplay blocked'));
-            }
-        } catch (err) {}
+      try {
+        const res = await api.get('/kot?status=ready');
+        const readyKOTs = res.data.data || [];
+        
+        const currentIds = readyKOTs.map(k => k._id);
+        const hasNew = currentIds.some(id => !knownReadyKOTIds.current.has(id));
+
+        if (hasNew && !isInitialKOT.current && userInteracted) {
+          audioRef.current.play().catch(e => console.log('Autoplay blocked'));
+        }
+
+        // Update known IDs
+        knownReadyKOTIds.current = new Set(currentIds);
+        isInitialKOT.current = false;
+      } catch (err) {}
     };
     const iv = setInterval(checkKOTs, 10000);
     return () => clearInterval(iv);

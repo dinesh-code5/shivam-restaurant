@@ -26,7 +26,7 @@ const NotificationBell = () => {
   const isInitial = useRef(true);
   const audioRef = useRef(new Audio('/bell.wav'));
 
-  const [lastCount, setLastCount] = useState(0);
+  const lastCountRef = useRef(0);
 
   const fetchNotifs = async () => {
     try {
@@ -35,7 +35,7 @@ const NotificationBell = () => {
       const newCount = res.data.count || 0;
       
       // Only play sound if new notifications arrived and the total count increased
-      if (!isInitial.current && newCount > lastCount) {
+      if (!isInitial.current && newCount > lastCountRef.current) {
         if (userInteracted) {
           audioRef.current.play().catch(e => console.log('Autoplay blocked'));
         }
@@ -43,7 +43,7 @@ const NotificationBell = () => {
       isInitial.current = false;
       setNotifs(newNotifs);
       setCount(newCount);
-      setLastCount(newCount);
+      lastCountRef.current = newCount;
     } catch {}
   };
 
@@ -64,6 +64,7 @@ const NotificationBell = () => {
       await api.put('/notifications/read-all');
       setNotifs([]);
       setCount(0);
+      lastCountRef.current = 0;
     } catch {}
   };
 
