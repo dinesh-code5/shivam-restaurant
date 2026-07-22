@@ -98,9 +98,9 @@ export default function Navbar() {
             <div className="lg:hidden flex items-center gap-3">
               <Link
                 to="/admin"
-                className="font-sans text-[10px] tracking-[0.1em] uppercase text-gold-400 border border-gold-400 px-3 pb-3 py-1.5 hover:bg-gold-400 hover:text-charcoal-950 transition-colors"
+                className="font-sans text-[11px] xl:text-[12px] tracking-[0.2em] uppercase text-white/85 hover:text-gold-400 transition-colors"
               >
-                Staff
+                STAFF
               </Link>
 
               {/* Hamburger button for mobile */}
